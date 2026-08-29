@@ -1,0 +1,31 @@
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: audiovisual-gestao-db-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    env_file: .env
+    networks:
+      - techacademy-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  api:
+    build: ./api
+    container_name: nest-js-app
+    env_file: .env
+    depends_on:
+      - mysqldb
+    networks:
+      - techacademy-network
+    ports:
+      - "3000:3000"
+
+networks:
+  techacademy-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  dbeaver_data:

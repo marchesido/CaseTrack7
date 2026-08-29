@@ -1,0 +1,54 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main, master, devel ]
+  pull_request:
+    branches: [ main, master, devel ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: audiovisual-gestao-db
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: root
+          DB_NAME: audiovisual-gestao-db
+          JWT_SECRET: super_secret_jwt_key_12345
+          JWT_EXPIRATION_TIME: 1d
