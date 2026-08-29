@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { DamagesModule } from './damages/damages.module';
+import { UploadModule } from './upload/upload.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -23,6 +24,7 @@ import { DamagesModule } from './damages/damages.module';
     EquipmentsModule,
     AuthModule,
     DamagesModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
