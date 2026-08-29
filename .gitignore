@@ -148,4 +148,4 @@ dist/
 
 # Projeto - Arquivos e Referências de Contexto
 doc/
-
+.agents/
