@@ -149,3 +149,5 @@ dist/
 # Projeto - Arquivos e Referências de Contexto
 doc/
 .agents/
+AGENTS.md
+GEMINI.md
