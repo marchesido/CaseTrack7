@@ -30,6 +30,9 @@ export class Equipment {
   @Column({ type: 'enum', enum: EquipmentStatus, default: EquipmentStatus.DISPONIVEL })
   status: EquipmentStatus;
 
+  @Column({ length: 255, nullable: true })
+  imageUrl: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

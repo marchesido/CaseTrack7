@@ -47,4 +47,13 @@ export class CreateEquipmentDto {
   })
   @IsOptional()
   status?: EquipmentStatus;
+
+  @ApiProperty({
+    description: 'URL ou caminho relativo da foto do equipamento',
+    example: '/uploads/abc12345.jpg',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  imageUrl?: string;
 }

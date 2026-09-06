@@ -22,7 +22,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           process.env.JWT_SECRET ||
           'super-secret-key',
         signOptions: {
-          expiresIn: configService.get<number>('JWT_EXPIRATION_TIME')!,
+          expiresIn: (configService.get<string>('JWT_EXPIRATION_TIME') ||
+            '1d') as any,
         },
       }),
       inject: [ConfigService],

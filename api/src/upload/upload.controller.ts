@@ -19,10 +19,10 @@ export class UploadController {
         fileSize: 5 * 1024 * 1024, // 5MB limit
       },
       fileFilter: (req: any, file: any, cb: any) => {
-        if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+        if (file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('Apenas arquivos de imagem são permitidos (jpg, jpeg, png)'), false);
+          cb(new BadRequestException('Apenas arquivos de imagem são permitidos (jpg, jpeg, png, webp)'), false);
         }
       },
       storage: diskStorage({
@@ -41,6 +41,8 @@ export class UploadController {
     return {
       message: 'Upload realizado com sucesso',
       filePath: file.path,
+      filename: file.filename,
+      url: `/uploads/${file.filename}`,
     };
   }
 }
