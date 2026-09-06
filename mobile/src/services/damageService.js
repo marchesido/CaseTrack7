@@ -84,6 +84,21 @@ export const damageService = {
     const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
     return `${hostRoot}${cleanPath}`;
   },
+
+  /**
+   * Busca todas as avarias vinculadas a um equipamento específico
+   * @param {string} equipmentId - UUID do equipamento
+   * @returns {Promise<Array>} Lista de avarias do equipamento
+   */
+  async getByEquipmentId(equipmentId) {
+    if (!equipmentId) return [];
+    const list = await this.list();
+    if (!Array.isArray(list)) return [];
+    return list.filter((item) => {
+      const eqId = item.equipment?.id || item.equipment;
+      return String(eqId) === String(equipmentId);
+    });
+  },
 };
 
 export default damageService;

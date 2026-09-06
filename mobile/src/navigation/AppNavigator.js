@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import EquipmentListScreen from '../screens/EquipmentListScreen';
 import EquipmentFormScreen from '../screens/EquipmentFormScreen';
+import EquipmentDetailScreen from '../screens/EquipmentDetailScreen';
 import DamageFormScreen from '../screens/DamageFormScreen';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +33,13 @@ export default function AppNavigator() {
           name="EquipmentList" 
           component={EquipmentListScreen} 
           options={{ title: 'Equipamentos' }}
+        />
+        <Stack.Screen 
+          name="EquipmentDetail" 
+          component={EquipmentDetailScreen} 
+          options={({ route }) => ({
+            title: route.params?.equipment?.name ? `${route.params.equipment.name}` : 'Detalhes do Equipamento',
+          })}
         />
         <Stack.Screen 
           name="EquipmentForm" 

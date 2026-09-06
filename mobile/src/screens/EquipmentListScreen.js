@@ -176,7 +176,11 @@ export default function EquipmentListScreen({ navigation, route }) {
             </View>
           )}
 
-          <View style={styles.cardBody}>
+          <TouchableOpacity
+            style={styles.cardBody}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('EquipmentDetail', { equipment: item })}
+          >
             <View style={styles.cardHeader}>
               <Text style={styles.equipmentName} numberOfLines={1}>
                 {item.name}
@@ -195,10 +199,19 @@ export default function EquipmentListScreen({ navigation, route }) {
                 {item.description}
               </Text>
             ) : null}
-          </View>
+
+            <Text style={styles.viewDetailHint}>Ver detalhes e avarias ›</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.actionsContainer}>
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.detailBtn]}
+            onPress={() => navigation.navigate('EquipmentDetail', { equipment: item })}
+          >
+            <Text style={styles.detailBtnText}>👁️ Detalhes</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={[styles.actionBtn, styles.damageBtn]}
             onPress={() => navigation.navigate('DamageForm', { equipment: item })}
@@ -633,6 +646,22 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 6,
     ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
+  },
+  viewDetailHint: {
+    fontSize: 12,
+    color: '#2563EB',
+    fontWeight: '600',
+    marginTop: 6,
+  },
+  detailBtn: {
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+  },
+  detailBtnText: {
+    color: '#1E3A8A',
+    fontWeight: '600',
+    fontSize: 13,
   },
   damageBtn: {
     backgroundColor: '#FEF3C7',
