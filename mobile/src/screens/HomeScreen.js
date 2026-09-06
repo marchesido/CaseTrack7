@@ -4,17 +4,23 @@ import CustomButton from '../components/CustomButton';
 import CustomInput from '../components/CustomInput';
 import Card from '../components/Card';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSearch = () => {
     setLoading(true);
-    setTimeout(() => setLoading(false), 1000);
+    setTimeout(() => {
+      setLoading(false);
+      navigation.navigate('EquipmentList', { initialSearch: search.trim() });
+    }, 200);
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      keyboardShouldPersistTaps="handled"
+    >
       <Text style={styles.title}>Bem-vindo, Produtor!</Text>
       
       <Card style={styles.cardSpacing}>
@@ -29,7 +35,7 @@ export default function HomeScreen() {
         />
         
         <CustomButton 
-          title="Buscar" 
+          title="Ver Acervo Completo" 
           onPress={handleSearch} 
           loading={loading} 
         />
@@ -38,13 +44,18 @@ export default function HomeScreen() {
       <Card>
         <Text style={styles.cardTitle}>Ações Rápidas</Text>
         <CustomButton 
-          title="Novo Equipamento" 
-          onPress={() => {}} 
+          title="Listar Equipamentos" 
+          onPress={() => navigation.navigate('EquipmentList')} 
           style={styles.actionButton}
         />
         <CustomButton 
+          title="Novo Equipamento" 
+          onPress={() => navigation.navigate('EquipmentForm')} 
+          style={[styles.actionButton, styles.primaryActionButton]}
+        />
+        <CustomButton 
           title="Registrar Avaria" 
-          onPress={() => {}} 
+          onPress={() => navigation.navigate('DamageForm')} 
           style={styles.actionButton}
         />
       </Card>
@@ -81,5 +92,8 @@ const styles = StyleSheet.create({
   actionButton: {
     backgroundColor: '#4B5563', // Secondary Color
     marginBottom: 12,
+  },
+  primaryActionButton: {
+    backgroundColor: '#1E3A8A', // Primary Navy Blue
   },
 });

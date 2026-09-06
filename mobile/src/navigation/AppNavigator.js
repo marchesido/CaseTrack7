@@ -2,6 +2,9 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
+import EquipmentListScreen from '../screens/EquipmentListScreen';
+import EquipmentFormScreen from '../screens/EquipmentFormScreen';
+import DamageFormScreen from '../screens/DamageFormScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +27,23 @@ export default function AppNavigator() {
           name="Home" 
           component={HomeScreen} 
           options={{ title: 'CaseTrack' }}
+        />
+        <Stack.Screen 
+          name="EquipmentList" 
+          component={EquipmentListScreen} 
+          options={{ title: 'Equipamentos' }}
+        />
+        <Stack.Screen 
+          name="EquipmentForm" 
+          component={EquipmentFormScreen} 
+          options={({ route }) => ({
+            title: route.params?.equipment ? 'Editar Equipamento' : 'Novo Equipamento',
+          })}
+        />
+        <Stack.Screen 
+          name="DamageForm" 
+          component={DamageFormScreen} 
+          options={{ title: 'Registrar Avaria' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
