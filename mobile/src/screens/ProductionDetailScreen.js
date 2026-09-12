@@ -8,6 +8,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native';
 import Card from '../components/Card';
 import CustomButton from '../components/CustomButton';
@@ -16,6 +17,7 @@ import EquipmentMovementModal from '../components/EquipmentMovementModal';
 import EquipmentSubstitutionModal from '../components/EquipmentSubstitutionModal';
 import productionService from '../services/productionService';
 import equipmentService from '../services/equipmentService';
+import googleCalendarService from '../services/googleCalendarService';
 import showAlert from '../utils/alert';
 import { COLORS, RADIUS, SPACING } from '../utils/theme';
 
@@ -50,6 +52,7 @@ export default function ProductionDetailScreen({ navigation, route }) {
 
   // Estado de andamento de etapa
   const [processingStageId, setProcessingStageId] = useState(null);
+  const [syncingGoogle, setSyncingGoogle] = useState(false);
 
   // Carrega os detalhes completos da produção
   const loadProduction = useCallback(async (isRefresh = false) => {
@@ -337,6 +340,46 @@ export default function ProductionDetailScreen({ navigation, route }) {
     };
   }, [production]);
 
+  // Sincronização com o Google Calendar
+  const handleSyncGoogleCalendar = async () => {
+    setSyncingGoogle(true);
+    try {
+      await googleCalendarService.syncProduction(productionId);
+      showAlert(
+        'Agenda Sincronizada! 🎬',
+        'A produção e o cronograma de etapas foram atualizados no Google Calendar com sucesso.',
+      );
+      loadProduction();
+    } catch (err) {
+      if (err.isGoogleReconnectRequired || err.status === 424) {
+        Alert.alert(
+          'Reconexão com o Google Necessária',
+          'Sua sessão com o Google expirou ou foi revogada. Deseja abrir a página de autorização para reconectar agora?',
+          [
+            { text: 'Agora não', style: 'cancel' },
+            {
+              text: 'Reconectar',
+              onPress: async () => {
+                try {
+                  const auth = await googleCalendarService.getAuthUrl();
+                  if (auth?.url) {
+                    Linking.openURL(auth.url);
+                  }
+                } catch (authErr) {
+                  showAlert('Erro', 'Não foi possível gerar link de autorização.');
+                }
+              },
+            },
+          ],
+        );
+      } else {
+        showAlert('Erro de Sincronização', err.message || 'Falha ao sincronizar com o Google Calendar.');
+      }
+    } finally {
+      setSyncingGoogle(false);
+    }
+  };
+
   if (loading && !refreshing) {
     return (
       <View style={styles.centerContainer}>
@@ -397,6 +440,42 @@ export default function ProductionDetailScreen({ navigation, route }) {
             <Text style={styles.cancelBtnText}>Cancelar Produção</Text>
           </TouchableOpacity>
         )}
+      </Card>
+
+      {/* Card de Integração Google Calendar */}
+      <Card style={styles.calendarCard}>
+        <View style={styles.calendarHeaderRow}>
+          <View style={styles.calendarTitleBlock}>
+            <Text style={styles.calendarCardTitle}>📅 Google Agenda & Diárias</Text>
+            <Text style={styles.calendarCardSubtitle}>
+              {production.googleEventId
+                ? `Sincronizado em ${formatDate(production.lastSyncedAt)}`
+                : 'Não sincronizado com a agenda corporativa'}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.syncPill,
+              production.googleEventId ? styles.syncPillActive : styles.syncPillInactive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.syncPillText,
+                production.googleEventId ? styles.syncPillTextActive : styles.syncPillTextInactive,
+              ]}
+            >
+              {production.googleEventId ? 'Sincronizado' : 'Pendente'}
+            </Text>
+          </View>
+        </View>
+
+        <CustomButton
+          title={production.googleEventId ? 'Atualizar no Google Calendar' : 'Sincronizar no Google Calendar'}
+          onPress={handleSyncGoogleCalendar}
+          loading={syncingGoogle}
+          style={styles.calendarSyncBtn}
+        />
       </Card>
 
       {/* Abas Internas */}
@@ -908,5 +987,56 @@ const styles = StyleSheet.create({
   },
   retryBtn: {
     minWidth: 160,
+  },
+  calendarCard: {
+    marginBottom: SPACING.md,
+    backgroundColor: '#0F172A',
+    borderColor: '#3B82F6',
+    borderWidth: 1,
+  },
+  calendarHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  calendarTitleBlock: {
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
+  calendarCardTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#F8FAFC',
+  },
+  calendarCardSubtitle: {
+    fontSize: 12,
+    color: '#94A3B8',
+    marginTop: 2,
+  },
+  syncPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: RADIUS.full,
+  },
+  syncPillActive: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  },
+  syncPillInactive: {
+    backgroundColor: 'rgba(148, 163, 184, 0.15)',
+  },
+  syncPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  syncPillTextActive: {
+    color: '#10B981',
+  },
+  syncPillTextInactive: {
+    color: '#94A3B8',
+  },
+  calendarSyncBtn: {
+    marginTop: SPACING.xs,
+    backgroundColor: '#1E40AF',
   },
 });
