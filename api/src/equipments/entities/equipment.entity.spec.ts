@@ -1,5 +1,5 @@
 import { Equipment } from './equipment.entity';
-import { ProductionEquipment } from '../../production-equipment/entities/production-equipment.entity';
+import { ProductionEquipment } from '../../productions/entities/production-equipment.entity';
 
 describe('EquipmentEntity', () => {
   it('should create an Equipment entity', () => {
