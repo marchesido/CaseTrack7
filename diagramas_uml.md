@@ -44,6 +44,29 @@ usecaseDiagram
     Admin --> UC7
 ```
 
+### 1.3 Ciclo de Produções Audiovisuais e Movimentações em Campo (Sprint 6)
+```mermaid
+usecaseDiagram
+    actor Produtor as "Produtor / Gestor de Set"
+    actor Operador as "Operador / Freelancer"
+    
+    package "CaseTrack - Produções e Set" {
+        usecase UC9 as "Criar e Gerenciar Produção (4 Etapas)"
+        usecase UC10 as "Alocar Equipamentos ao Projeto"
+        usecase UC11 as "Realizar Check-out de Equipamento"
+        usecase UC12 as "Realizar Check-in com Inspeção e Avaria"
+        usecase UC13 as "Substituir Equipamento em Campo (B13)"
+        usecase UC14 as "Concluir Etapa com Validação de Devolução"
+    }
+    
+    Produtor --> UC9
+    Produtor --> UC10
+    Produtor --> UC13
+    Produtor --> UC14
+    Operador --> UC11
+    Operador --> UC12
+```
+
 ---
 
 ## 2. Diagramas de Atividades
@@ -90,6 +113,27 @@ activityDiagram
         endif
     else (Não)
         :Exibe mensagem de "Acesso Negado";
+    endif
+    stop
+```
+
+### 2.3 Fluxo de Conclusão da Captação e Auto-conclusão da Produção (Sprint 6)
+```mermaid
+activityDiagram
+    start
+    :Produtor solicita Conclusão da Etapa "Captação";
+    :Sistema busca equipamentos com status "CHECKED_OUT";
+    if (Existem equipamentos em posse da equipe?) then (Sim)
+        :Sistema bloqueia avanço da etapa;
+        :Exibe erro 400 "Devolva todos os itens para concluir a Captação";
+        stop
+    else (Não)
+        :Sistema marca Etapa como "COMPLETED";
+        :Avança status da Produção para próxima etapa;
+        if (Última etapa concluída E 100% itens devolvidos?) then (Sim)
+            :Atualiza status da Produção para "COMPLETED";
+        else (Não)
+        endif
     endif
     stop
 ```
@@ -145,6 +189,25 @@ sequenceDiagram
     API->>DB: UPDATE Reserva (Status: Aprovado)
     DB-->>API: Atualizado
     API-->>Admin: 200 OK
+```
+
+### 3.3 Fluxo de Substituição Atômica de Equipamento em Campo (B13 - Sprint 6)
+```mermaid
+sequenceDiagram
+    participant App as App Mobile (Produtor)
+    participant API as Backend (NestJS)
+    participant DB as Banco MySQL (TypeORM Tx)
+    
+    App->>API: POST /productions/{id}/equipments/{peId}/substitute
+    Note right of App: Payload: substituteEquipmentId, reason
+    API->>API: Valida Permissão (RolesGuard)
+    API->>DB: Inicia Transação Atômica (QueryRunner)
+    API->>DB: Busca ProductionEquipment atual e valida status
+    API->>DB: UPDATE ProductionEquipment (status = REPLACED, notes = reason)
+    API->>DB: INSERT ProductionEquipment (equipamento substituto, status = ALLOCATED)
+    API->>DB: Commit Transação
+    DB-->>API: Transação Confirmada
+    API-->>App: 200 OK (Item substituído com histórico preservado)
 ```
 
 ---
@@ -203,11 +266,72 @@ erDiagram
         datetime emitido_em
     }
 
+    PRODUCAO {
+        int id PK
+        string titulo
+        string descricao
+        string status "PLANNING, IN_PROGRESS, COMPLETED, CANCELLED"
+        date data_inicio
+        date data_fim
+        decimal orcamento
+        string cliente_nome
+        int criado_por_id FK
+        datetime criado_em
+    }
+
+    ETAPA_PRODUCAO {
+        int id PK
+        int producao_id FK
+        string tipo "PRE_PRODUCTION, SHOOTING, POST_PRODUCTION, DELIVERY"
+        string status "PENDING, IN_PROGRESS, COMPLETED"
+        int ordem
+        date data_inicio
+        date data_fim
+        string notas
+    }
+
+    EQUIPAMENTO_PRODUCAO {
+        int id PK
+        int producao_id FK
+        int equipamento_id FK
+        string status "ALLOCATED, CHECKED_OUT, CHECKED_IN, REPLACED, DAMAGED"
+        datetime alocado_em
+        datetime devolvido_em
+        string notas
+    }
+
+    MOVIMENTACAO_EQUIPAMENTO {
+        int id PK
+        int producao_equipamento_id FK
+        string tipo "CHECK_OUT ou CHECK_IN"
+        string status "SUCCESS ou INSPECTION_FAILED"
+        int executado_por_id FK
+        datetime timestamp
+        string notas
+    }
+
+    GOOGLE_TOKEN {
+        int id PK
+        int usuario_id FK
+        string access_token_enc
+        string refresh_token_enc
+        string iv
+        string auth_tag
+        datetime expira_em
+    }
+
     USUARIO ||--o{ RESERVA : solicita
     USUARIO ||--o{ CHECK_IN_OUT : registra
     USUARIO ||--o{ AVARIA : reporta
+    USUARIO ||--o{ PRODUCAO : gerencia
+    USUARIO ||--o{ GOOGLE_TOKEN : autentica
+    USUARIO ||--o{ MOVIMENTACAO_EQUIPAMENTO : realiza
     EQUIPAMENTO ||--o{ RESERVA : associado_a
     EQUIPAMENTO ||--o{ AVARIA : possui
+    EQUIPAMENTO ||--o{ EQUIPAMENTO_PRODUCAO : alocado_em
     RESERVA ||--|{ CHECK_IN_OUT : tem
     RESERVA ||--o| CONTRATO : gera
+    PRODUCAO ||--|{ ETAPA_PRODUCAO : composta_por
+    PRODUCAO ||--o{ EQUIPAMENTO_PRODUCAO : contem
+    EQUIPAMENTO_PRODUCAO ||--o{ MOVIMENTACAO_EQUIPAMENTO : historico
 ```
