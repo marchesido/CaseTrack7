@@ -241,6 +241,38 @@ sequenceDiagram
     API-->>App: 200 OK (Sincronizado com Sucesso)
 ```
 
+### 3.5 Fluxo de Emissão de Termo em PDF e Assinatura Digital (Sprint 8)
+```mermaid
+sequenceDiagram
+    participant App as App Mobile (Produtor/Gestor)
+    participant API as Backend (NestJS)
+    participant PDF as PDFKit Generator
+    participant FS as File System (/uploads/contracts)
+    participant DB as Banco MySQL (TypeORM)
+    
+    App->>API: POST /contracts/production/:productionId
+    API->>DB: Busca Produção com Etapas e Equipamentos
+    alt Termo já existe para Produção
+        API-->>App: Retorna Contrato Existente
+    else Gerar Novo Termo
+        API->>PDF: Renderiza Termo de Responsabilidade (Layout Audiovisual)
+        Note over PDF: Cabeçalho, Metadados, Tabela de Itens (Serial), Cláusulas Legais
+        PDF->>FS: Salva termo_{uuid}.pdf em uploads/contracts/
+        API->>DB: INSERT Contrato (status = ISSUED, documento_url = /uploads/contracts/...)
+        DB-->>API: Contrato Salvo
+        API-->>App: 201 Created (Contrato Gerado)
+    end
+
+    App->>API: GET /contracts/:id/download
+    API->>FS: Stream application/pdf
+    FS-->>App: Exibe/Download do PDF no Dispositivo
+
+    App->>API: POST /contracts/:id/sign { signer_name, signer_document }
+    API->>DB: UPDATE Contrato (status = SIGNED, signer_name, signer_document, signed_at = NOW)
+    DB-->>API: Contrato Assinado
+    API-->>App: 200 OK (Termo Assinado com Sucesso)
+```
+
 ---
 
 ## 4. Diagrama Entidade-Relacionamento (DER)
@@ -292,8 +324,14 @@ erDiagram
 
     CONTRATO {
         int id PK
+        int producao_id FK
         int reserva_id FK
         string documento_url
+        string status "DRAFT, ISSUED, SIGNED, CANCELLED"
+        string signer_name
+        string signer_document
+        datetime signed_at
+        string terms_summary
         datetime emitido_em
     }
 
@@ -333,6 +371,7 @@ erDiagram
 
     MOVIMENTACAO_EQUIPAMENTO {
         int id PK
+        int producao_id FK
         int producao_equipamento_id FK
         string tipo "CHECK_OUT ou CHECK_IN"
         string status "SUCCESS ou INSPECTION_FAILED"
@@ -364,5 +403,6 @@ erDiagram
     RESERVA ||--o| CONTRATO : gera
     PRODUCAO ||--|{ ETAPA_PRODUCAO : composta_por
     PRODUCAO ||--o{ EQUIPAMENTO_PRODUCAO : contem
+    PRODUCAO ||--o{ CONTRATO : gera
     EQUIPAMENTO_PRODUCAO ||--o{ MOVIMENTACAO_EQUIPAMENTO : historico
 ```
