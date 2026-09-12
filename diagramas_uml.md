@@ -210,6 +210,37 @@ sequenceDiagram
     API-->>App: 200 OK (Item substituído com histórico preservado)
 ```
 
+### 3.4 Fluxo de Sincronização com Google Calendar (Sprint 7)
+```mermaid
+sequenceDiagram
+    participant App as App Mobile
+    participant API as Backend (NestJS)
+    participant DB as Banco MySQL
+    participant GAuth as Google OAuth2
+    participant GCal as Google Calendar API v3
+    
+    App->>API: POST /productions/{id}/sync-google
+    API->>DB: Busca GoogleToken (singleton)
+    alt Access Token Expirado
+        API->>API: Descriptografa Refresh Token (AES-256-GCM)
+        API->>GAuth: POST /token (refresh_token)
+        alt Token Revogado / Inválido
+            GAuth-->>API: 400 invalid_grant
+            API-->>App: 424 Failed Dependency (GOOGLE_RECONNECT_REQUIRED)
+            Note over App: App exibe diálogo oferecendo reconexão sem logout
+        else Token Renovado com Sucesso
+            GAuth-->>API: Novos tokens (access_token, expires_in)
+            API->>DB: UPDATE GoogleToken (novo accessToken, expiresAt)
+        end
+    end
+    
+    API->>DB: Busca Produção com Etapas e Equipamentos
+    API->>GCal: POST/PATCH /calendars/primary/events (Payload com diárias e itens)
+    GCal-->>API: 200 OK (eventId, htmlLink)
+    API->>DB: UPDATE Production (googleEventId, lastSyncedAt, googleSourceStatus = ACTIVE)
+    API-->>App: 200 OK (Sincronizado com Sucesso)
+```
+
 ---
 
 ## 4. Diagrama Entidade-Relacionamento (DER)
