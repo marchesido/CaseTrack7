@@ -6,6 +6,9 @@ import EquipmentListScreen from '../screens/EquipmentListScreen';
 import EquipmentFormScreen from '../screens/EquipmentFormScreen';
 import EquipmentDetailScreen from '../screens/EquipmentDetailScreen';
 import DamageFormScreen from '../screens/DamageFormScreen';
+import ProductionListScreen from '../screens/ProductionListScreen';
+import ProductionDetailScreen from '../screens/ProductionDetailScreen';
+import ProductionFormScreen from '../screens/ProductionFormScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -52,6 +55,23 @@ export default function AppNavigator() {
           name="DamageForm" 
           component={DamageFormScreen} 
           options={{ title: 'Registrar Avaria' }}
+        />
+        <Stack.Screen 
+          name="ProductionList" 
+          component={ProductionListScreen} 
+          options={{ title: 'Produções Audiovisuais' }}
+        />
+        <Stack.Screen 
+          name="ProductionDetail" 
+          component={ProductionDetailScreen} 
+          options={({ route }) => ({
+            title: route.params?.title ? `${route.params.title}` : 'Detalhes da Produção',
+          })}
+        />
+        <Stack.Screen 
+          name="ProductionForm" 
+          component={ProductionFormScreen} 
+          options={{ title: 'Nova Produção' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

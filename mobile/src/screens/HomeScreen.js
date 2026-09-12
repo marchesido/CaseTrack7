@@ -41,8 +41,24 @@ export default function HomeScreen({ navigation }) {
         />
       </Card>
       
+      <Card style={styles.cardSpacing}>
+        <Text style={styles.cardTitle}>🎬 Produções Audiovisuais</Text>
+        <Text style={styles.cardSubtitle}>Ciclo de 4 etapas, checklists e movimentações</Text>
+
+        <CustomButton 
+          title="Ver Produções & Etapas" 
+          onPress={() => navigation.navigate('ProductionList')} 
+          style={styles.actionButton}
+        />
+        <CustomButton 
+          title="Nova Produção" 
+          onPress={() => navigation.navigate('ProductionForm')} 
+          style={[styles.actionButton, styles.primaryActionButton]}
+        />
+      </Card>
+
       <Card>
-        <Text style={styles.cardTitle}>Ações Rápidas</Text>
+        <Text style={styles.cardTitle}>📦 Gestão do Acervo</Text>
         <CustomButton 
           title="Listar Equipamentos" 
           onPress={() => navigation.navigate('EquipmentList')} 
@@ -51,10 +67,10 @@ export default function HomeScreen({ navigation }) {
         <CustomButton 
           title="Novo Equipamento" 
           onPress={() => navigation.navigate('EquipmentForm')} 
-          style={[styles.actionButton, styles.primaryActionButton]}
+          style={styles.actionButton}
         />
         <CustomButton 
-          title="Registrar Avaria" 
+          title="Registrar Avaria com Foto" 
           onPress={() => navigation.navigate('DamageForm')} 
           style={styles.actionButton}
         />
