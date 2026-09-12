@@ -30,6 +30,7 @@ async function bootstrap() {
     .addTag('Production Stages', 'Controle e avanço das etapas lineares de produção')
     .addTag('Equipment Movements', 'Movimentações de checkout, checkin e reprovação de inspeção')
     .addTag('Productions Google Calendar', 'Integração OAuth2 e sincronização de eventos com Google Agenda')
+    .addTag('Contracts & Terms', 'Emissão de contratos/termos em PDF e assinatura digital')
     .addTag('equipments', 'Inventário e CRUD de equipamentos')
     .addTag('damages', 'Registro de avarias com imagens')
     .addTag('auth', 'Autenticação JWT e controle de papéis')

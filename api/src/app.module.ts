@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { DamagesModule } from './damages/damages.module';
 import { UploadModule } from './upload/upload.module';
 import { ProductionsModule } from './productions/productions.module';
+import { ContractsModule } from './contracts/contracts.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -27,6 +28,7 @@ import { ProductionsModule } from './productions/productions.module';
     DamagesModule,
     UploadModule,
     ProductionsModule,
+    ContractsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
