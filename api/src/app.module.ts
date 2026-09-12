@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { DamagesModule } from './damages/damages.module';
 import { UploadModule } from './upload/upload.module';
+import { ProductionsModule } from './productions/productions.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -25,6 +26,7 @@ import { UploadModule } from './upload/upload.module';
     AuthModule,
     DamagesModule,
     UploadModule,
+    ProductionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
