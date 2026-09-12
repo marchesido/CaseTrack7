@@ -167,7 +167,7 @@ export default function DamageFormScreen({ navigation, route }) {
 
     setSubmitting(true);
     try {
-      await damageService.create({
+      const createdDamage = await damageService.create({
         fileUri: imageUri,
         fileSize: imageFileSize,
         equipmentId: selectedEquipmentId,
@@ -181,6 +181,26 @@ export default function DamageFormScreen({ navigation, route }) {
         });
       } catch (e) {
         // Não impede o sucesso se o usuário não tiver permissão de update no equipamento
+      }
+
+      if (route.params?.returnScreen) {
+        showAlert(
+          'Avaria Registrada',
+          'O laudo de avaria e a evidência fotográfica foram salvos com sucesso.',
+          [
+            {
+              text: 'Continuar Movimentação',
+              onPress: () => {
+                navigation.navigate(route.params.returnScreen, {
+                  damageId: String(createdDamage?.id || ''),
+                  equipmentId: selectedEquipmentId,
+                  ...(route.params.returnParams || {}),
+                });
+              },
+            },
+          ],
+        );
+        return;
       }
 
       showAlert(
