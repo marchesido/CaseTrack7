@@ -15,9 +15,11 @@ import CustomButton from '../components/CustomButton';
 import StatusBadge from '../components/StatusBadge';
 import EquipmentMovementModal from '../components/EquipmentMovementModal';
 import EquipmentSubstitutionModal from '../components/EquipmentSubstitutionModal';
+import ContractModal from '../components/ContractModal';
 import productionService from '../services/productionService';
 import equipmentService from '../services/equipmentService';
 import googleCalendarService from '../services/googleCalendarService';
+import contractService from '../services/contractService';
 import showAlert from '../utils/alert';
 import { COLORS, RADIUS, SPACING } from '../utils/theme';
 
@@ -54,6 +56,11 @@ export default function ProductionDetailScreen({ navigation, route }) {
   const [processingStageId, setProcessingStageId] = useState(null);
   const [syncingGoogle, setSyncingGoogle] = useState(false);
 
+  // Estado do Módulo de Contratos e Termos (RF05)
+  const [contract, setContract] = useState(null);
+  const [contractModalVisible, setContractModalVisible] = useState(false);
+  const [loadingContract, setLoadingContract] = useState(false);
+
   // Carrega os detalhes completos da produção
   const loadProduction = useCallback(async (isRefresh = false) => {
     if (!productionId) return;
@@ -67,6 +74,14 @@ export default function ProductionDetailScreen({ navigation, route }) {
     try {
       const data = await productionService.getById(productionId);
       setProduction(data);
+
+      // Carrega o termo de responsabilidade vinculado
+      try {
+        const cData = await contractService.getByProduction(productionId);
+        setContract(cData);
+      } catch (_) {
+        setContract(null);
+      }
     } catch (err) {
       setError(err.message || 'Falha ao carregar detalhes da produção.');
     } finally {
@@ -380,6 +395,42 @@ export default function ProductionDetailScreen({ navigation, route }) {
     }
   };
 
+  // Emissão de Contrato em PDF (RF05)
+  const handleGenerateContract = async () => {
+    setLoadingContract(true);
+    try {
+      const newContract = await contractService.generateForProduction(productionId);
+      setContract(newContract);
+      showAlert(
+        'Termo Emitido com Sucesso! 📄',
+        'O contrato em PDF foi gerado consolidando todos os equipamentos alocados.',
+      );
+    } catch (err) {
+      showAlert('Erro na Emissão', err.message || 'Falha ao emitir termo em PDF.');
+    } finally {
+      setLoadingContract(false);
+    }
+  };
+
+  // Assinatura Digital do Contrato (RF05)
+  const handleSignContract = async ({ signerName, signerDocument }) => {
+    if (!contract) return;
+    try {
+      const signed = await contractService.signContract(contract.id, {
+        signerName,
+        signerDocument,
+      });
+      setContract(signed);
+      showAlert(
+        'Termo Assinado! ✍️',
+        'A assinatura digital foi registrada com sucesso e vinculada ao documento.',
+      );
+    } catch (err) {
+      showAlert('Erro na Assinatura', err.message || 'Não foi possível assinar o termo.');
+      throw err;
+    }
+  };
+
   if (loading && !refreshing) {
     return (
       <View style={styles.centerContainer}>
@@ -475,6 +526,49 @@ export default function ProductionDetailScreen({ navigation, route }) {
           onPress={handleSyncGoogleCalendar}
           loading={syncingGoogle}
           style={styles.calendarSyncBtn}
+        />
+      </Card>
+
+      {/* Card de Contrato & Termo de Responsabilidade (RF05) */}
+      <Card style={styles.contractCard}>
+        <View style={styles.calendarHeaderRow}>
+          <View style={styles.calendarTitleBlock}>
+            <Text style={styles.calendarCardTitle}>📄 Termo de Cessão & Responsabilidade</Text>
+            <Text style={styles.calendarCardSubtitle}>
+              {contract
+                ? `Termo Nº CT-${contract.id} (${contract.status === 'SIGNED' ? 'Assinado Digitalmente' : 'Pendente de Assinatura'})`
+                : 'Nenhum termo gerado para esta produção'}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.syncPill,
+              contract?.status === 'SIGNED'
+                ? styles.syncPillActive
+                : contract
+                ? styles.contractPillIssued
+                : styles.syncPillInactive,
+            ]}
+          >
+            <Text
+              style={[
+                styles.syncPillText,
+                contract?.status === 'SIGNED'
+                  ? styles.syncPillTextActive
+                  : contract
+                  ? styles.contractPillTextIssued
+                  : styles.syncPillTextInactive,
+              ]}
+            >
+              {contract?.status === 'SIGNED' ? 'Assinado' : contract ? 'Emitido' : 'Não Emitido'}
+            </Text>
+          </View>
+        </View>
+
+        <CustomButton
+          title={contract ? 'Visualizar / Assinar Termo' : 'Emitir Termo de Responsabilidade (PDF)'}
+          onPress={() => setContractModalVisible(true)}
+          style={styles.contractActionBtn}
         />
       </Card>
 
@@ -701,6 +795,17 @@ export default function ProductionDetailScreen({ navigation, route }) {
         setSubstitutionReason={setSubstitutionReason}
         submitting={submittingSubstitution}
         onConfirm={handleConfirmSubstitution}
+      />
+
+      {/* Modal de Contrato e Termo de Cessão (RF05) */}
+      <ContractModal
+        visible={contractModalVisible}
+        contract={contract}
+        loading={loadingContract}
+        onClose={() => setContractModalVisible(false)}
+        onGenerate={handleGenerateContract}
+        onSign={handleSignContract}
+        pdfUrl={contractService.getPdfUrl(contract)}
       />
     </ScrollView>
   );
@@ -1038,5 +1143,21 @@ const styles = StyleSheet.create({
   calendarSyncBtn: {
     marginTop: SPACING.xs,
     backgroundColor: '#1E40AF',
+  },
+  contractCard: {
+    marginBottom: SPACING.md,
+    backgroundColor: '#0F172A',
+    borderColor: '#10B981',
+    borderWidth: 1,
+  },
+  contractPillIssued: {
+    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+  },
+  contractPillTextIssued: {
+    color: '#38BDF8',
+  },
+  contractActionBtn: {
+    marginTop: SPACING.xs,
+    backgroundColor: '#059669',
   },
 });
