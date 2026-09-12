@@ -115,6 +115,20 @@ api.interceptors.response.use(
 
     if (status === 401) {
       console.warn('[API Auth Error]: Sessão expirada ou não autorizada (401).');
+      clearAuthToken();
+    }
+
+    if (status === 424) {
+      console.warn('[API Google Error]: Reconexão com o Google necessária (424).');
+      return Promise.reject({
+        status: 424,
+        isGoogleReconnectRequired: true,
+        error: data?.error || 'GOOGLE_RECONNECT_REQUIRED',
+        message:
+          errorMessage ||
+          'Reconexão com o Google necessária. Por favor, reconecte sua conta Google no painel de configurações.',
+        data,
+      });
     }
 
     return Promise.reject({
