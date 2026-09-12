@@ -20,17 +20,18 @@ async function bootstrap() {
     }),
   );
   const config = new DocumentBuilder()
-    .setTitle('Digital Matricula API')
+    .setTitle('CaseTrack API — Gestão Audiovisual & Produções')
     .setDescription(
-      'Empower your educational experience with the Digital Matricula API. Seamlessly manage courses, academic information, and more with this robust and user-friendly interface. Version 1.0 brings innovative features to enhance your academic journey.',
+      'API REST para gestão de equipamentos audiovisuais, produções em 4 etapas (Captação, Edição, Backup, Upload), movimentações com controle de avarias/inspeção e integração Google Agenda.',
     )
-
     .setVersion('1.0')
-    .addTag('clients', 'Explore and manage courses effortlessly.')
-    .addTag('projects', '')
-    .addTag('productions', '')
-    .addTag('equipaments', '')
-    .addTag('projects-equipments', '')
+    .addBearerAuth()
+    .addTag('Productions', 'Gestão do ciclo de vida das produções audiovisuais')
+    .addTag('Production Stages', 'Controle e avanço das etapas lineares de produção')
+    .addTag('Equipment Movements', 'Movimentações de checkout, checkin e reprovação de inspeção')
+    .addTag('equipments', 'Inventário e CRUD de equipamentos')
+    .addTag('damages', 'Registro de avarias com imagens')
+    .addTag('auth', 'Autenticação JWT e controle de papéis')
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);
