@@ -21,7 +21,10 @@ import {
   ProductionEquipment,
   MovementStatus,
 } from './entities/production-equipment.entity';
-import { Equipment, EquipmentStatus } from '../equipments/entities/equipment.entity';
+import {
+  Equipment,
+  EquipmentStatus,
+} from '../equipments/entities/equipment.entity';
 import { User, UserRole } from '../users/entities/user.entity';
 import { CreateProductionDto } from './dto/create-production.dto';
 import { UpdateProductionDto } from './dto/update-production.dto';
@@ -64,7 +67,9 @@ export class ProductionsService {
         title: dto.title,
         description: dto.description || null,
         scheduledAt: new Date(dto.scheduledAt),
-        scheduledEndAt: dto.scheduledEndAt ? new Date(dto.scheduledEndAt) : null,
+        scheduledEndAt: dto.scheduledEndAt
+          ? new Date(dto.scheduledEndAt)
+          : null,
         isAllDay: dto.isAllDay ?? false,
         timezone: dto.timezone || 'America/Sao_Paulo',
         status: ProductionStatus.SCHEDULED,
@@ -81,7 +86,10 @@ export class ProductionsService {
         },
       });
 
-      const savedProduction = await queryRunner.manager.save(Production, production);
+      const savedProduction = await queryRunner.manager.save(
+        Production,
+        production,
+      );
 
       // 2. Resolver responsáveis das etapas se fornecidos
       const stagesConfig = [
@@ -158,7 +166,10 @@ export class ProductionsService {
   /**
    * Lista produções com filtros (data, status, busca) e filtragem de perfil.
    */
-  async findAll(query: QueryProductionsDto, user?: { id: string; role: UserRole }): Promise<Production[]> {
+  async findAll(
+    query: QueryProductionsDto,
+    user?: { id: string; role: UserRole },
+  ): Promise<Production[]> {
     const qb = this.productionRepo
       .createQueryBuilder('production')
       .leftJoinAndSelect('production.stages', 'stage')
@@ -197,7 +208,10 @@ export class ProductionsService {
   /**
    * Busca detalhes completos de uma produção
    */
-  async findOne(id: string, user?: { id: string; role: UserRole }): Promise<Production> {
+  async findOne(
+    id: string,
+    user?: { id: string; role: UserRole },
+  ): Promise<Production> {
     const production = await this.productionRepo.findOne({
       where: { id },
       relations: [
@@ -253,16 +267,23 @@ export class ProductionsService {
 
     if (dto.title !== undefined) production.title = dto.title;
     if (dto.description !== undefined) production.description = dto.description;
-    if (dto.scheduledAt !== undefined) production.scheduledAt = new Date(dto.scheduledAt);
+    if (dto.scheduledAt !== undefined)
+      production.scheduledAt = new Date(dto.scheduledAt);
     if (dto.scheduledEndAt !== undefined)
-      production.scheduledEndAt = dto.scheduledEndAt ? new Date(dto.scheduledEndAt) : null;
+      production.scheduledEndAt = dto.scheduledEndAt
+        ? new Date(dto.scheduledEndAt)
+        : null;
     if (dto.isAllDay !== undefined) production.isAllDay = dto.isAllDay;
     if (dto.timezone !== undefined) production.timezone = dto.timezone;
     if (dto.status !== undefined) production.status = dto.status;
 
     // Atualização dos responsáveis das etapas se fornecido
     if (dto.assignees) {
-      const stageMappings: { type: ProductionStageType; userId?: string; overrideKey: string }[] = [
+      const stageMappings: {
+        type: ProductionStageType;
+        userId?: string;
+        overrideKey: string;
+      }[] = [
         {
           type: ProductionStageType.CAPTACAO,
           userId: dto.assignees.captureResponsibleUserId,
@@ -290,7 +311,9 @@ export class ProductionsService {
           const stage = production.stages?.find((s) => s.type === map.type);
           if (stage) {
             if (map.userId) {
-              const user = await this.userRepo.findOne({ where: { id: map.userId } });
+              const user = await this.userRepo.findOne({
+                where: { id: map.userId },
+              });
               stage.responsibleUser = user || null;
             } else {
               stage.responsibleUser = null;
@@ -384,11 +407,15 @@ export class ProductionsService {
     });
 
     if (!prodEquipment) {
-      throw new NotFoundException(`Item de produção com ID ${peId} não encontrado`);
+      throw new NotFoundException(
+        `Item de produção com ID ${peId} não encontrado`,
+      );
     }
 
     if (prodEquipment.production?.id !== productionId) {
-      throw new BadRequestException('O equipamento não pertence à produção informada');
+      throw new BadRequestException(
+        'O equipamento não pertence à produção informada',
+      );
     }
 
     // Busca o novo equipamento solicitado
@@ -397,7 +424,9 @@ export class ProductionsService {
     });
 
     if (!newEquipment) {
-      throw new NotFoundException('Novo equipamento substituto não encontrado no inventário');
+      throw new NotFoundException(
+        'Novo equipamento substituto não encontrado no inventário',
+      );
     }
 
     // Valida se o novo equipamento está DISPONIVEL

@@ -25,7 +25,9 @@ export class ProductionStagesController {
   constructor(private readonly stagesService: ProductionStagesService) {}
 
   @Patch(':stageId/start')
-  @ApiOperation({ summary: 'Iniciar o andamento de uma etapa (PENDING -> IN_PROGRESS)' })
+  @ApiOperation({
+    summary: 'Iniciar o andamento de uma etapa (PENDING -> IN_PROGRESS)',
+  })
   @ApiResponse({ status: 200, description: 'Etapa iniciada com sucesso' })
   @ApiResponse({ status: 403, description: 'Não autorizado para esta etapa' })
   @ApiResponse({ status: 404, description: 'Etapa ou produção não encontrada' })
@@ -46,7 +48,8 @@ export class ProductionStagesController {
   @ApiResponse({ status: 200, description: 'Etapa concluída com sucesso' })
   @ApiResponse({
     status: 422,
-    description: 'Todos os equipamentos ativos/substitutos devem ser retirados antes de concluir a captação',
+    description:
+      'Todos os equipamentos ativos/substitutos devem ser retirados antes de concluir a captação',
   })
   @ApiResponse({ status: 403, description: 'Não autorizado para esta etapa' })
   @ApiResponse({ status: 404, description: 'Etapa ou produção não encontrada' })

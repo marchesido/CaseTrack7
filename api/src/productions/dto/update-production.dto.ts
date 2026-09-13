@@ -12,7 +12,8 @@ export class UpdateProductionDto extends PartialType(CreateProductionDto) {
   })
   @IsOptional()
   @IsEnum(ProductionStatus, {
-    message: 'Status inválido. Use SCHEDULED, IN_PROGRESS, COMPLETED ou CANCELLED',
+    message:
+      'Status inválido. Use SCHEDULED, IN_PROGRESS, COMPLETED ou CANCELLED',
   })
   status?: ProductionStatus;
 }

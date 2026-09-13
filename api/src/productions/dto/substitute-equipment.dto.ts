@@ -3,7 +3,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SubstituteEquipmentDto {
   @ApiProperty({
-    description: 'UUID do novo equipamento substituto (deve estar DISPONIVEL no inventário)',
+    description:
+      'UUID do novo equipamento substituto (deve estar DISPONIVEL no inventário)',
     example: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
   })
   @IsNotEmpty({ message: 'O ID do novo equipamento substituto é obrigatório' })
@@ -11,8 +12,10 @@ export class SubstituteEquipmentDto {
   newEquipmentId: string;
 
   @ApiPropertyOptional({
-    description: 'Justificativa ou observação sobre a substituição do item avariado',
-    example: 'Item original apresentou falha na inspeção prévia de retirada (avaria identificada).',
+    description:
+      'Justificativa ou observação sobre a substituição do item avariado',
+    example:
+      'Item original apresentou falha na inspeção prévia de retirada (avaria identificada).',
   })
   @IsOptional()
   @IsString()

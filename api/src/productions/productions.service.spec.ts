@@ -4,10 +4,19 @@ import { DataSource, Repository } from 'typeorm';
 import { ProductionsService } from './productions.service';
 import { Production, ProductionStatus } from './entities/production.entity';
 import { ProductionStage } from './entities/production-stage.entity';
-import { ProductionEquipment, MovementStatus } from './entities/production-equipment.entity';
-import { Equipment, EquipmentStatus } from '../equipments/entities/equipment.entity';
+import {
+  ProductionEquipment,
+  MovementStatus,
+} from './entities/production-equipment.entity';
+import {
+  Equipment,
+  EquipmentStatus,
+} from '../equipments/entities/equipment.entity';
 import { User, UserRole } from '../users/entities/user.entity';
-import { UnprocessableEntityException, NotFoundException } from '@nestjs/common';
+import {
+  UnprocessableEntityException,
+  NotFoundException,
+} from '@nestjs/common';
 
 describe('ProductionsService', () => {
   let service: ProductionsService;
@@ -25,7 +34,11 @@ describe('ProductionsService', () => {
     rollbackTransaction: jest.fn(),
     release: jest.fn(),
     manager: {
-      save: jest.fn().mockImplementation((entityClass, data) => Promise.resolve({ id: 'saved-id', ...data })),
+      save: jest
+        .fn()
+        .mockImplementation((entityClass, data) =>
+          Promise.resolve({ id: 'saved-id', ...data }),
+        ),
       findOne: jest.fn(),
     },
   };

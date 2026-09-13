@@ -2,11 +2,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductionStagesService } from './production-stages.service';
-import { ProductionStage, ProductionStageType, StageStatus } from './entities/production-stage.entity';
+import {
+  ProductionStage,
+  ProductionStageType,
+  StageStatus,
+} from './entities/production-stage.entity';
 import { Production, ProductionStatus } from './entities/production.entity';
 import { MovementStatus } from './entities/production-equipment.entity';
 import { ProductionCompletionService } from './production-completion.service';
-import { UnprocessableEntityException, ForbiddenException } from '@nestjs/common';
+import {
+  UnprocessableEntityException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { UserRole } from '../users/entities/user.entity';
 
 describe('ProductionStagesService', () => {
@@ -35,7 +42,9 @@ describe('ProductionStagesService', () => {
         {
           provide: ProductionCompletionService,
           useValue: {
-            checkAndAutoComplete: jest.fn().mockResolvedValue({ autoCompleted: false }),
+            checkAndAutoComplete: jest
+              .fn()
+              .mockResolvedValue({ autoCompleted: false }),
           },
         },
       ],
@@ -70,7 +79,10 @@ describe('ProductionStagesService', () => {
       stageRepo.findOne.mockResolvedValue(mockStage as any);
 
       await expect(
-        service.completeStage('prod-1', 'stage-cap', { id: 'user-op', role: UserRole.FREELANCER }),
+        service.completeStage('prod-1', 'stage-cap', {
+          id: 'user-op',
+          role: UserRole.FREELANCER,
+        }),
       ).rejects.toThrow(UnprocessableEntityException);
     });
 
@@ -96,7 +108,10 @@ describe('ProductionStagesService', () => {
       stageRepo.findOne.mockResolvedValue(mockStage as any);
 
       await expect(
-        service.completeStage('prod-1', 'stage-cap', { id: 'user-op', role: UserRole.FREELANCER }),
+        service.completeStage('prod-1', 'stage-cap', {
+          id: 'user-op',
+          role: UserRole.FREELANCER,
+        }),
       ).rejects.toThrow(UnprocessableEntityException);
     });
 
@@ -132,7 +147,9 @@ describe('ProductionStagesService', () => {
       });
 
       expect(result.stage.status).toBe(StageStatus.COMPLETED);
-      expect(completionService.checkAndAutoComplete).toHaveBeenCalledWith('prod-1');
+      expect(completionService.checkAndAutoComplete).toHaveBeenCalledWith(
+        'prod-1',
+      );
     });
   });
 });

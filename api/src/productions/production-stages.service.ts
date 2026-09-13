@@ -112,9 +112,9 @@ export class ProductionStagesService {
 
     // Regra B9 & B13: Bloqueio da conclusão de Captação caso equipamentos ativos não tenham sido retirados
     if (stage.type === ProductionStageType.CAPTACAO) {
-      const activeEquipments = (stage.production.productionEquipments || []).filter(
-        (pe) => pe.isActive,
-      );
+      const activeEquipments = (
+        stage.production.productionEquipments || []
+      ).filter((pe) => pe.isActive);
 
       const hasUncheckedEquipment = activeEquipments.some(
         (pe) =>
@@ -141,9 +141,8 @@ export class ProductionStagesService {
     }
 
     // Dispara auto-conclusão da produção se todas as condições forem atendidas
-    const completionResult = await this.completionService.checkAndAutoComplete(
-      productionId,
-    );
+    const completionResult =
+      await this.completionService.checkAndAutoComplete(productionId);
 
     return {
       stage,

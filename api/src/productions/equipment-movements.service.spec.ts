@@ -2,13 +2,26 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EquipmentMovementsService } from './equipment-movements.service';
-import { ProductionEquipment, MovementStatus } from './entities/production-equipment.entity';
-import { EquipmentMovement, EquipmentMovementType, EquipmentCondition } from './entities/equipment-movement.entity';
-import { Equipment, EquipmentStatus } from '../equipments/entities/equipment.entity';
+import {
+  ProductionEquipment,
+  MovementStatus,
+} from './entities/production-equipment.entity';
+import {
+  EquipmentMovement,
+  EquipmentMovementType,
+  EquipmentCondition,
+} from './entities/equipment-movement.entity';
+import {
+  Equipment,
+  EquipmentStatus,
+} from '../equipments/entities/equipment.entity';
 import { Damage } from '../damages/entities/damage.entity';
 import { User } from '../users/entities/user.entity';
 import { ProductionCompletionService } from './production-completion.service';
-import { UnprocessableEntityException, BadRequestException } from '@nestjs/common';
+import {
+  UnprocessableEntityException,
+  BadRequestException,
+} from '@nestjs/common';
 
 describe('EquipmentMovementsService', () => {
   let service: EquipmentMovementsService;
@@ -59,7 +72,9 @@ describe('EquipmentMovementsService', () => {
         {
           provide: ProductionCompletionService,
           useValue: {
-            checkAndAutoComplete: jest.fn().mockResolvedValue({ autoCompleted: false }),
+            checkAndAutoComplete: jest
+              .fn()
+              .mockResolvedValue({ autoCompleted: false }),
           },
         },
       ],
@@ -85,7 +100,12 @@ describe('EquipmentMovementsService', () => {
       prodEquipmentRepo.findOne.mockResolvedValue(mockPe as any);
 
       await expect(
-        service.checkout('prod-1', 'pe-1', { condition: EquipmentCondition.OK }, { id: 'user-1' }),
+        service.checkout(
+          'prod-1',
+          'pe-1',
+          { condition: EquipmentCondition.OK },
+          { id: 'user-1' },
+        ),
       ).rejects.toThrow(UnprocessableEntityException);
     });
 
@@ -99,7 +119,10 @@ describe('EquipmentMovementsService', () => {
       };
       prodEquipmentRepo.findOne.mockResolvedValue(mockPe as any);
       userRepo.findOne.mockResolvedValue({ id: 'user-1' } as any);
-      damageRepo.findOne.mockResolvedValue({ id: 10, equipment: { id: 'eq-1' } } as any);
+      damageRepo.findOne.mockResolvedValue({
+        id: 10,
+        equipment: { id: 'eq-1' },
+      } as any);
 
       try {
         await service.checkout(
@@ -165,7 +188,12 @@ describe('EquipmentMovementsService', () => {
       prodEquipmentRepo.findOne.mockResolvedValue(mockPe as any);
 
       await expect(
-        service.checkin('prod-1', 'pe-1', { condition: EquipmentCondition.OK }, { id: 'user-1' }),
+        service.checkin(
+          'prod-1',
+          'pe-1',
+          { condition: EquipmentCondition.OK },
+          { id: 'user-1' },
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -189,7 +217,9 @@ describe('EquipmentMovementsService', () => {
 
       expect(mockEq.status).toBe(EquipmentStatus.DISPONIVEL);
       expect(mockPe.movementStatus).toBe(MovementStatus.RETURNED_OK);
-      expect(completionService.checkAndAutoComplete).toHaveBeenCalledWith('prod-1');
+      expect(completionService.checkAndAutoComplete).toHaveBeenCalledWith(
+        'prod-1',
+      );
     });
   });
 });

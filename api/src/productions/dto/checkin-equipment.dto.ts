@@ -1,4 +1,11 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateIf } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateIf,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { EquipmentCondition } from '../entities/equipment-movement.entity';
 
@@ -15,11 +22,15 @@ export class CheckinEquipmentDto {
   condition: EquipmentCondition;
 
   @ApiPropertyOptional({
-    description: 'ID da avaria registrada previamente (obrigatório se condition = DAMAGED)',
+    description:
+      'ID da avaria registrada previamente (obrigatório se condition = DAMAGED)',
     example: 1,
   })
   @ValidateIf((o) => o.condition === EquipmentCondition.DAMAGED)
-  @IsNotEmpty({ message: 'damageId é obrigatório quando o equipamento é devolvido com avaria' })
+  @IsNotEmpty({
+    message:
+      'damageId é obrigatório quando o equipamento é devolvido com avaria',
+  })
   @IsNumber({}, { message: 'damageId deve ser um número' })
   damageId?: number;
 

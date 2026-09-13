@@ -33,14 +33,23 @@ export class EquipmentMovementsController {
     summary:
       'Realizar checkout (retirada) do equipamento ou registrar reprovação por avaria na inspeção',
   })
-  @ApiResponse({ status: 200, description: 'Checkout efetuado com sucesso (status EM_USO)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Checkout efetuado com sucesso (status EM_USO)',
+  })
   @ApiResponse({
     status: 422,
     description:
       'Equipamento em manutenção ou reprovado na inspeção prévia (INSPECTION_FAILED). Solicite substituição ao gestor.',
   })
-  @ApiResponse({ status: 400, description: 'damageId ausente quando condition=DAMAGED ou status inválido' })
-  @ApiResponse({ status: 404, description: 'Produção ou equipamento não encontrado' })
+  @ApiResponse({
+    status: 400,
+    description: 'damageId ausente quando condition=DAMAGED ou status inválido',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Produção ou equipamento não encontrado',
+  })
   checkout(
     @Param('id') productionId: string,
     @Param('peId') peId: string,
@@ -58,10 +67,18 @@ export class EquipmentMovementsController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Devolução realizada com sucesso (DISPONIVEL ou MANUTENCAO se DAMAGED)',
+    description:
+      'Devolução realizada com sucesso (DISPONIVEL ou MANUTENCAO se DAMAGED)',
   })
-  @ApiResponse({ status: 400, description: 'damageId ausente quando condition=DAMAGED ou status não é CHECKED_OUT' })
-  @ApiResponse({ status: 404, description: 'Produção ou equipamento não encontrado' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'damageId ausente quando condition=DAMAGED ou status não é CHECKED_OUT',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Produção ou equipamento não encontrado',
+  })
   checkin(
     @Param('id') productionId: string,
     @Param('peId') peId: string,
@@ -72,8 +89,14 @@ export class EquipmentMovementsController {
   }
 
   @Get('movements')
-  @ApiOperation({ summary: 'Obter histórico de movimentações e inspeções deste equipamento na produção' })
-  @ApiResponse({ status: 200, description: 'Histórico de movimentações ordenadas por data decrescente' })
+  @ApiOperation({
+    summary:
+      'Obter histórico de movimentações e inspeções deste equipamento na produção',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Histórico de movimentações ordenadas por data decrescente',
+  })
   getMovements(@Param('id') productionId: string, @Param('peId') peId: string) {
     return this.movementsService.getMovements(productionId, peId);
   }

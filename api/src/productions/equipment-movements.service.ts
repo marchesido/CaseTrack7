@@ -15,7 +15,10 @@ import {
   EquipmentMovementType,
   EquipmentCondition,
 } from './entities/equipment-movement.entity';
-import { Equipment, EquipmentStatus } from '../equipments/entities/equipment.entity';
+import {
+  Equipment,
+  EquipmentStatus,
+} from '../equipments/entities/equipment.entity';
 import { Damage } from '../damages/entities/damage.entity';
 import { User } from '../users/entities/user.entity';
 import { CheckoutEquipmentDto } from './dto/checkout-equipment.dto';
@@ -58,11 +61,15 @@ export class EquipmentMovementsService {
     });
 
     if (!prodEquipment) {
-      throw new NotFoundException(`Item de produção com ID ${peId} não encontrado`);
+      throw new NotFoundException(
+        `Item de produção com ID ${peId} não encontrado`,
+      );
     }
 
     if (prodEquipment.production?.id !== productionId) {
-      throw new BadRequestException('O equipamento não pertence à produção informada');
+      throw new BadRequestException(
+        'O equipamento não pertence à produção informada',
+      );
     }
 
     const equipment = prodEquipment.equipment;
@@ -80,7 +87,9 @@ export class EquipmentMovementsService {
       );
     }
 
-    const operator = await this.userRepo.findOne({ where: { id: operatorUser.id } });
+    const operator = await this.userRepo.findOne({
+      where: { id: operatorUser.id },
+    });
     if (!operator) {
       throw new NotFoundException('Operador não encontrado');
     }
@@ -99,11 +108,15 @@ export class EquipmentMovementsService {
       });
 
       if (!damage) {
-        throw new BadRequestException('Registro de avaria informado não encontrado');
+        throw new BadRequestException(
+          'Registro de avaria informado não encontrado',
+        );
       }
 
       if (damage.equipment?.id !== equipment.id) {
-        throw new BadRequestException('A avaria informada não pertence a este equipamento');
+        throw new BadRequestException(
+          'A avaria informada não pertence a este equipamento',
+        );
       }
 
       // 1. Registra movimentação de tipo INSPECTION_FAILED
@@ -173,11 +186,15 @@ export class EquipmentMovementsService {
     });
 
     if (!prodEquipment) {
-      throw new NotFoundException(`Item de produção com ID ${peId} não encontrado`);
+      throw new NotFoundException(
+        `Item de produção com ID ${peId} não encontrado`,
+      );
     }
 
     if (prodEquipment.production?.id !== productionId) {
-      throw new BadRequestException('O equipamento não pertence à produção informada');
+      throw new BadRequestException(
+        'O equipamento não pertence à produção informada',
+      );
     }
 
     if (prodEquipment.movementStatus !== MovementStatus.CHECKED_OUT) {
@@ -187,7 +204,9 @@ export class EquipmentMovementsService {
     }
 
     const equipment = prodEquipment.equipment;
-    const operator = await this.userRepo.findOne({ where: { id: operatorUser.id } });
+    const operator = await this.userRepo.findOne({
+      where: { id: operatorUser.id },
+    });
     if (!operator) {
       throw new NotFoundException('Operador não encontrado');
     }
@@ -207,11 +226,15 @@ export class EquipmentMovementsService {
       });
 
       if (!damage) {
-        throw new BadRequestException('Registro de avaria informado não encontrado');
+        throw new BadRequestException(
+          'Registro de avaria informado não encontrado',
+        );
       }
 
       if (damage.equipment?.id !== equipment.id) {
-        throw new BadRequestException('A avaria informada não pertence a este equipamento');
+        throw new BadRequestException(
+          'A avaria informada não pertence a este equipamento',
+        );
       }
 
       // Atualiza movimentação para RETURNED_DAMAGED e equipamento para MANUTENCAO
@@ -237,9 +260,8 @@ export class EquipmentMovementsService {
     await this.equipmentRepo.save(equipment);
 
     // Dispara checagem de auto-conclusão da produção se todos os itens foram devolvidos
-    const completionResult = await this.completionService.checkAndAutoComplete(
-      productionId,
-    );
+    const completionResult =
+      await this.completionService.checkAndAutoComplete(productionId);
 
     return {
       message:

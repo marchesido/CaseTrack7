@@ -24,7 +24,9 @@ describe('ProductionCompletionService', () => {
       ],
     }).compile();
 
-    service = module.get<ProductionCompletionService>(ProductionCompletionService);
+    service = module.get<ProductionCompletionService>(
+      ProductionCompletionService,
+    );
     productionRepo = module.get(getRepositoryToken(Production));
   });
 

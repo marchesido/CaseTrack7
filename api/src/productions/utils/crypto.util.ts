@@ -9,7 +9,9 @@ const AUTH_TAG_LENGTH = 16; // 16 bytes padrão
  * Caso não esteja configurada ou tenha tamanho diferente, deriva com SHA-256 para garantir 32 bytes.
  */
 function getEncryptionKey(): Buffer {
-  const secret = process.env.GOOGLE_TOKEN_ENCRYPTION_KEY || 'casetrack-google-oauth-secret-key-32b!';
+  const secret =
+    process.env.GOOGLE_TOKEN_ENCRYPTION_KEY ||
+    'casetrack-google-oauth-secret-key-32b!';
   return crypto.createHash('sha256').update(secret).digest();
 }
 
@@ -23,7 +25,10 @@ export function encryptToken(plainText: string): string {
   const key = getEncryptionKey();
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
 
-  const encrypted = Buffer.concat([cipher.update(plainText, 'utf8'), cipher.final()]);
+  const encrypted = Buffer.concat([
+    cipher.update(plainText, 'utf8'),
+    cipher.final(),
+  ]);
   const authTag = cipher.getAuthTag();
 
   return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`;
@@ -37,7 +42,9 @@ export function decryptToken(encryptedData: string): string {
   if (!encryptedData) return '';
   const parts = encryptedData.split(':');
   if (parts.length !== 3) {
-    throw new Error('Formato de token criptografado inválido. Esperado iv:authTag:ciphertext');
+    throw new Error(
+      'Formato de token criptografado inválido. Esperado iv:authTag:ciphertext',
+    );
   }
 
   const [ivHex, authTagHex, cipherTextHex] = parts;
@@ -49,6 +56,9 @@ export function decryptToken(encryptedData: string): string {
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
   decipher.setAuthTag(authTag);
 
-  const decrypted = Buffer.concat([decipher.update(cipherText), decipher.final()]);
+  const decrypted = Buffer.concat([
+    decipher.update(cipherText),
+    decipher.final(),
+  ]);
   return decrypted.toString('utf8');
 }

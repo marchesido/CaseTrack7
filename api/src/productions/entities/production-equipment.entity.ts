@@ -48,9 +48,13 @@ export class ProductionEquipment {
   @Column({ type: 'text', nullable: true })
   substitutionReason: string | null;
 
-  @ManyToOne(() => Production, (production) => production.productionEquipments, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(
+    () => Production,
+    (production) => production.productionEquipments,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   @JoinColumn({ name: 'production_id' })
   production: Production;
 
@@ -58,9 +62,13 @@ export class ProductionEquipment {
   @JoinColumn({ name: 'equipment_id' })
   equipment: Equipment;
 
-  @OneToMany(() => EquipmentMovement, (movement) => movement.productionEquipment, {
-    cascade: true,
-  })
+  @OneToMany(
+    () => EquipmentMovement,
+    (movement) => movement.productionEquipment,
+    {
+      cascade: true,
+    },
+  )
   movements: EquipmentMovement[];
 
   @CreateDateColumn()

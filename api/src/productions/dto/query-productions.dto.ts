@@ -4,7 +4,8 @@ import { ProductionStatus } from '../entities/production.entity';
 
 export class QueryProductionsDto {
   @ApiPropertyOptional({
-    description: 'Filtrar por data específica no fuso da produção (formato YYYY-MM-DD)',
+    description:
+      'Filtrar por data específica no fuso da produção (formato YYYY-MM-DD)',
     example: '2026-09-10',
   })
   @IsOptional()

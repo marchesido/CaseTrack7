@@ -38,7 +38,9 @@ export class ProductionsController {
   @Post()
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Criar nova produção com etapas e equipamentos (ADMIN)' })
+  @ApiOperation({
+    summary: 'Criar nova produção com etapas e equipamentos (ADMIN)',
+  })
   @ApiResponse({ status: 201, description: 'Produção criada com sucesso' })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 401, description: 'Não autenticado' })
@@ -49,15 +51,21 @@ export class ProductionsController {
 
   @Get('my/pending')
   @ApiOperation({
-    summary: 'Listar pendências operacionais do usuário logado (etapas e devoluções)',
+    summary:
+      'Listar pendências operacionais do usuário logado (etapas e devoluções)',
   })
-  @ApiResponse({ status: 200, description: 'Objeto contendo pendingStages e pendingReturns' })
+  @ApiResponse({
+    status: 200,
+    description: 'Objeto contendo pendingStages e pendingReturns',
+  })
   findMyPending(@Request() req: any) {
     return this.productionsService.findMyPending(req.user.id);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar produções com filtros (data, status, busca)' })
+  @ApiOperation({
+    summary: 'Listar produções com filtros (data, status, busca)',
+  })
   @ApiResponse({ status: 200, description: 'Lista de produções encontradas' })
   findAll(@Query() query: QueryProductionsDto, @Request() req: any) {
     return this.productionsService.findAll(query, req.user);
@@ -65,7 +73,10 @@ export class ProductionsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obter detalhes completos de uma produção' })
-  @ApiResponse({ status: 200, description: 'Detalhes da produção com etapas e equipamentos' })
+  @ApiResponse({
+    status: 200,
+    description: 'Detalhes da produção com etapas e equipamentos',
+  })
   @ApiResponse({ status: 404, description: 'Produção não encontrada' })
   findOne(@Param('id') id: string, @Request() req: any) {
     return this.productionsService.findOne(id, req.user);
@@ -107,7 +118,10 @@ export class ProductionsController {
     status: 422,
     description: 'Equipamento substituto não está disponível para uso',
   })
-  @ApiResponse({ status: 404, description: 'Produção ou equipamento não encontrado' })
+  @ApiResponse({
+    status: 404,
+    description: 'Produção ou equipamento não encontrado',
+  })
   substituteEquipment(
     @Param('id') id: string,
     @Param('peId') peId: string,
