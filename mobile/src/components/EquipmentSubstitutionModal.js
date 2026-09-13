@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import CustomButton from './CustomButton';
+import { useTheme } from '../contexts/ThemeContext';
 import { COLORS, RADIUS } from '../utils/theme';
 
 export default function EquipmentSubstitutionModal({
@@ -26,6 +27,7 @@ export default function EquipmentSubstitutionModal({
   onConfirm,
 }) {
   if (!visible) return null;
+  const { colors, isDark } = useTheme();
 
   return (
     <Modal
@@ -35,13 +37,13 @@ export default function EquipmentSubstitutionModal({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Substituição de Equipamento (Regra B13)</Text>
-          <Text style={styles.modalSubtitle}>
+        <View style={[styles.modalContent, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: isDark ? 1 : 0 }]}>
+          <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Substituição de Equipamento (Regra B13)</Text>
+          <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
             Item avariado: {substitutePE?.equipment?.name} (S/N: {substitutePE?.equipment?.serialNumber || 'N/A'})
           </Text>
 
-          <Text style={styles.inputLabel}>Equipamento Reserva Disponível:</Text>
+          <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Equipamento Reserva Disponível:</Text>
           {loadingReplacements ? (
             <ActivityIndicator size="small" color={COLORS.brand.primary} style={styles.loader} />
           ) : availableEquipments.length === 0 ? (
@@ -78,11 +80,11 @@ export default function EquipmentSubstitutionModal({
             </ScrollView>
           )}
 
-          <Text style={styles.inputLabel}>Motivo da Substituição:</Text>
+          <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Motivo da Substituição:</Text>
           <TextInput
-            style={styles.modalTextInput}
+            style={[styles.modalTextInput, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, color: colors.textPrimary }]}
             placeholder="Ex: Substituição emergencial devido à falha na lente durante a inspeção..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textMuted}
             value={substitutionReason}
             onChangeText={setSubstitutionReason}
             multiline

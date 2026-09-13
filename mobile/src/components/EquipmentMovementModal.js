@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import CustomButton from './CustomButton';
+import { useTheme } from '../contexts/ThemeContext';
 import { RADIUS } from '../utils/theme';
 
 export default function EquipmentMovementModal({
@@ -25,6 +26,7 @@ export default function EquipmentMovementModal({
   onGoToDamageForm,
 }) {
   if (!visible) return null;
+  const { colors, isDark } = useTheme();
 
   return (
     <Modal
@@ -34,19 +36,19 @@ export default function EquipmentMovementModal({
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>
+        <View style={[styles.modalContent, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: isDark ? 1 : 0 }]}>
+          <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>
             {movementType === 'checkout'
               ? 'Inspeção de Saída (Checkout)'
               : 'Conferência de Retorno (Checkin)'}
           </Text>
 
-          <Text style={styles.modalSubtitle}>
+          <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
             {selectedPE?.equipment?.name} (S/N: {selectedPE?.equipment?.serialNumber || 'N/A'})
           </Text>
 
           {/* Condição do Equipamento */}
-          <Text style={styles.inputLabel}>Condição Física:</Text>
+          <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Condição Física:</Text>
           <View style={styles.conditionSelector}>
             <TouchableOpacity
               style={[
@@ -114,11 +116,11 @@ export default function EquipmentMovementModal({
           )}
 
           {/* Observações */}
-          <Text style={styles.inputLabel}>Observações (opcional):</Text>
+          <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Observações da Inspeção:</Text>
           <TextInput
-            style={styles.modalTextInput}
-            placeholder="Ex: Lacrado no case original, cabo incluso..."
-            placeholderTextColor="#94A3B8"
+            style={[styles.modalTextInput, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border, color: colors.textPrimary }]}
+            placeholder="Anotações sobre marcas de uso, limpeza ou itens adicionais..."
+            placeholderTextColor={colors.textMuted}
             value={notes}
             onChangeText={setNotes}
             multiline

@@ -21,9 +21,11 @@ import equipmentService from '../services/equipmentService';
 import googleCalendarService from '../services/googleCalendarService';
 import contractService from '../services/contractService';
 import showAlert from '../utils/alert';
+import { useTheme } from '../contexts/ThemeContext';
 import { COLORS, RADIUS, SPACING } from '../utils/theme';
 
 export default function ProductionDetailScreen({ navigation, route }) {
+  const { colors, isDark } = useTheme();
   const productionId = route.params?.id;
 
   const [production, setProduction] = useState(null);
@@ -455,33 +457,33 @@ export default function ProductionDetailScreen({ navigation, route }) {
 
   return (
     <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
+      style={[styles.container, { backgroundColor: colors.background }]}
+      contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => loadProduction(true)}
+          onRefresh={() => loadData(true)}
           colors={[COLORS.brand.primary]}
         />
       }
     >
-      {/* Cabeçalho da Produção */}
+      {/* Cabeçalho Resumo */}
       <Card style={styles.headerCard}>
         <View style={styles.headerRow}>
-          <Text style={styles.productionTitle}>{production.title}</Text>
+          <Text style={[styles.productionTitle, { color: colors.textPrimary }]}>{production.title}</Text>
           <StatusBadge status={production.status || 'SCHEDULED'} size="medium" />
         </View>
 
         {production.description ? (
-          <Text style={styles.productionDesc}>{production.description}</Text>
+          <Text style={[styles.productionDesc, { color: colors.textSecondary }]}>{production.description}</Text>
         ) : null}
 
-        <View style={styles.metaSection}>
-          <Text style={styles.metaItem}>📅 Início: {formatDate(production.scheduledAt)}</Text>
+        <View style={[styles.metaSection, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
+          <Text style={[styles.metaItem, { color: colors.textSecondary }]}>📅 Início: {formatDate(production.scheduledAt)}</Text>
           {production.scheduledEndAt && (
-            <Text style={styles.metaItem}>🏁 Fim: {formatDate(production.scheduledEndAt)}</Text>
+            <Text style={[styles.metaItem, { color: colors.textSecondary }]}>🏁 Fim: {formatDate(production.scheduledEndAt)}</Text>
           )}
-          <Text style={styles.metaItem}>
+          <Text style={[styles.metaItem, { color: colors.textSecondary }]}>
             🎬 Equipamentos Ativos: {captureMetrics.total} | Retirados: {captureMetrics.checkedOut}
           </Text>
         </View>
@@ -573,12 +575,12 @@ export default function ProductionDetailScreen({ navigation, route }) {
       </Card>
 
       {/* Abas Internas */}
-      <View style={styles.innerTabs}>
+      <View style={[styles.innerTabs, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <TouchableOpacity
           style={[styles.innerTab, activeTab === 'STAGES' && styles.activeInnerTab]}
           onPress={() => setActiveTab('STAGES')}
         >
-          <Text style={[styles.innerTabText, activeTab === 'STAGES' && styles.activeInnerTabText]}>
+          <Text style={[styles.innerTabText, { color: activeTab === 'STAGES' ? '#FFFFFF' : colors.textSecondary }, activeTab === 'STAGES' && styles.activeInnerTabText]}>
             Timeline das Etapas ({stages.length})
           </Text>
         </TouchableOpacity>
@@ -587,7 +589,7 @@ export default function ProductionDetailScreen({ navigation, route }) {
           style={[styles.innerTab, activeTab === 'CHECKLIST' && styles.activeInnerTab]}
           onPress={() => setActiveTab('CHECKLIST')}
         >
-          <Text style={[styles.innerTabText, activeTab === 'CHECKLIST' && styles.activeInnerTabText]}>
+          <Text style={[styles.innerTabText, { color: activeTab === 'CHECKLIST' ? '#FFFFFF' : colors.textSecondary }, activeTab === 'CHECKLIST' && styles.activeInnerTabText]}>
             Checklist de Equipamentos ({equipments.length})
           </Text>
         </TouchableOpacity>
@@ -603,12 +605,12 @@ export default function ProductionDetailScreen({ navigation, route }) {
             return (
               <Card key={stage.id} style={styles.stageCard}>
                 <View style={styles.stageHeader}>
-                  <View style={styles.stageNumberContainer}>
-                    <Text style={styles.stageNumber}>{idx + 1}</Text>
+                  <View style={[styles.stageNumberContainer, { backgroundColor: isDark ? '#1E3A8A33' : '#EFF6FF', borderColor: isDark ? '#1E3A8A' : '#BFDBFE' }]}>
+                    <Text style={[styles.stageNumber, { color: isDark ? '#93C5FD' : '#1E40AF' }]}>{idx + 1}</Text>
                   </View>
                   <View style={styles.stageTitleBlock}>
-                    <Text style={styles.stageTypeTitle}>{stage.type}</Text>
-                    <Text style={styles.stageDates}>
+                    <Text style={[styles.stageTypeTitle, { color: colors.textPrimary }]}>{stage.type}</Text>
+                    <Text style={[styles.stageDates, { color: colors.textMuted }]}>
                       {stage.status === 'COMPLETED'
                         ? `Concluída em ${formatDate(stage.completedAt)}`
                         : stage.status === 'IN_PROGRESS'

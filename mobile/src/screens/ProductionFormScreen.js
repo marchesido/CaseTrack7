@@ -17,10 +17,12 @@ import CustomButton from '../components/CustomButton';
 import productionService from '../services/productionService';
 import equipmentService from '../services/equipmentService';
 import showAlert from '../utils/alert';
+import { useTheme } from '../contexts/ThemeContext';
 import { COLORS, RADIUS, SPACING } from '../utils/theme';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ProductionFormScreen({ navigation }) {
+  const { colors, isDark } = useTheme();
   const { isAdmin } = useAuth();
 
   useEffect(() => {
@@ -177,15 +179,19 @@ export default function ProductionFormScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Dados Principais */}
         <Card style={styles.card}>
-          <Text style={styles.sectionHeader}>Dados Gerais do Projeto</Text>
+          <Text style={[styles.sectionHeader, { color: colors.textPrimary }]}>Identificação da Produção</Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
+            Informações gerais do projeto ou gravação audiovisual
+          </Text>
 
           <CustomInput
             label="Título da Produção *"
@@ -307,8 +313,8 @@ export default function ProductionFormScreen({ navigation }) {
         <Card style={styles.card}>
           <View style={styles.eqHeaderRow}>
             <View>
-              <Text style={styles.sectionHeader}>Equipamentos Necessários</Text>
-              <Text style={styles.sectionSubtitle}>
+              <Text style={[styles.sectionHeader, { color: colors.textPrimary }]}>Equipamentos Necessários</Text>
+              <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>
                 Selecione os itens do acervo para o checklist de saída
               </Text>
             </View>
@@ -320,18 +326,18 @@ export default function ProductionFormScreen({ navigation }) {
           </View>
 
           {/* Campo de busca rápida no acervo */}
-          <View style={styles.searchBar}>
+          <View style={[styles.searchBar, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
             <Text style={styles.searchIcon}>🔍</Text>
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.textPrimary }]}
               placeholder="Filtrar por nome ou número de série..."
-              placeholderTextColor="#94A3B8"
+              placeholderTextColor={colors.textMuted}
               value={equipmentSearch}
               onChangeText={setEquipmentSearch}
             />
             {equipmentSearch !== '' && (
               <TouchableOpacity onPress={() => setEquipmentSearch('')}>
-                <Text style={styles.clearBtnText}>✕</Text>
+                <Text style={[styles.clearBtnText, { color: colors.textSecondary }]}>✕</Text>
               </TouchableOpacity>
             )}
           </View>

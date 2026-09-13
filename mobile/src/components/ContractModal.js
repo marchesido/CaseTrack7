@@ -12,6 +12,7 @@ import {
 import CustomButton from './CustomButton';
 import CustomInput from './CustomInput';
 import StatusBadge from './StatusBadge';
+import { useTheme } from '../contexts/ThemeContext';
 import { COLORS, RADIUS, SPACING } from '../utils/theme';
 import showAlert from '../utils/alert';
 
@@ -64,19 +65,20 @@ export default function ContractModal({
   };
 
   if (!visible) return null;
+  const { colors, isDark } = useTheme();
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.modalCard}>
+        <View style={[styles.modalCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {/* Cabeçalho */}
           <View style={styles.headerRow}>
             <View style={styles.titleContainer}>
-              <Text style={styles.modalTitle}>📄 Termo de Cessão & Locação</Text>
-              <Text style={styles.modalSubtitle}>Documento Jurídico de Responsabilidade</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>📄 Termo de Cessão & Locação</Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>Documento Jurídico de Responsabilidade</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <Text style={[styles.closeBtnText, { color: colors.textSecondary }]}>✕</Text>
             </TouchableOpacity>
           </View>
 
@@ -103,13 +105,13 @@ export default function ContractModal({
             ) : (
               <View>
                 {/* Status e Metadados do Contrato */}
-                <View style={styles.statusSection}>
+                <View style={[styles.statusSection, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
                   <View style={styles.statusRow}>
-                    <Text style={styles.contractCode}>TERMO Nº CT-{contract.id}</Text>
+                    <Text style={[styles.contractCode, { color: colors.textPrimary }]}>TERMO Nº CT-{contract.id}</Text>
                     <StatusBadge status={contract.status} size="small" />
                   </View>
 
-                  <Text style={styles.metaText}>
+                  <Text style={[styles.metaText, { color: colors.textSecondary }]}>
                     📅 Emitido em:{' '}
                     {new Date(contract.emitido_em).toLocaleDateString('pt-BR', {
                       day: '2-digit',
@@ -121,18 +123,18 @@ export default function ContractModal({
                   </Text>
 
                   {contract.terms_summary ? (
-                    <Text style={styles.summaryText}>{contract.terms_summary}</Text>
+                    <Text style={[styles.summaryText, { color: colors.textMuted }]}>{contract.terms_summary}</Text>
                   ) : null}
                 </View>
 
                 {/* Botão de Visualização do PDF */}
-                <TouchableOpacity style={styles.pdfCardBtn} onPress={handleOpenPdf}>
+                <TouchableOpacity style={[styles.pdfCardBtn, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]} onPress={handleOpenPdf}>
                   <Text style={styles.pdfIcon}>📑</Text>
                   <View style={styles.pdfTextContainer}>
-                    <Text style={styles.pdfTitle}>Visualizar Documento PDF</Text>
-                    <Text style={styles.pdfSubtitle}>Abrir no leitor de PDF do sistema</Text>
+                    <Text style={[styles.pdfTitle, { color: colors.textPrimary }]}>Visualizar Documento PDF</Text>
+                    <Text style={[styles.pdfSubtitle, { color: colors.textSecondary }]}>Abrir no leitor de PDF do sistema</Text>
                   </View>
-                  <Text style={styles.pdfArrow}>→</Text>
+                  <Text style={[styles.pdfArrow, { color: colors.brand.primary }]}>→</Text>
                 </TouchableOpacity>
 
                 {/* Se já estiver assinado */}

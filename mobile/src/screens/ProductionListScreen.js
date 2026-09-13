@@ -15,6 +15,7 @@ import CustomButton from '../components/CustomButton';
 import StatusBadge from '../components/StatusBadge';
 import productionService from '../services/productionService';
 import showAlert from '../utils/alert';
+import { useTheme } from '../contexts/ThemeContext';
 import { COLORS, RADIUS, SHADOWS, SPACING } from '../utils/theme';
 
 const STATUS_FILTERS = [
@@ -26,6 +27,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function ProductionListScreen({ navigation }) {
+  const { colors, isDark } = useTheme();
   // Modo de visualização: 'ALL_PRODUCTIONS' | 'MY_PENDING'
   const [activeTab, setActiveTab] = useState('ALL_PRODUCTIONS');
 
@@ -135,30 +137,35 @@ export default function ProductionListScreen({ navigation }) {
     return (
       <Card style={styles.card}>
         <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => navigation.navigate('ProductionDetail', { id: item.id, title: item.title })}
+          activeOpacity={0.8}
+          onPress={() =>
+            navigation.navigate('ProductionDetail', {
+              id: item.id,
+              title: item.title,
+            })
+          }
         >
           <View style={styles.cardHeader}>
             <View style={styles.titleContainer}>
-              <Text style={styles.cardTitle} numberOfLines={1}>
+              <Text style={[styles.cardTitle, { color: colors.textPrimary }]} numberOfLines={1}>
                 {item.title}
               </Text>
-              <Text style={styles.cardDate}>
+              <Text style={[styles.cardDate, { color: colors.textMuted }]}>
                 📅 {formatDate(item.scheduledAt)}
               </Text>
             </View>
-            <StatusBadge status={item.status || 'SCHEDULED'} size="small" />
+            <StatusBadge status={item.status || 'SCHEDULED'} size="medium" />
           </View>
 
           {item.description ? (
-            <Text style={styles.cardDescription} numberOfLines={2}>
+            <Text style={[styles.cardDescription, { color: colors.textSecondary }]} numberOfLines={2}>
               {item.description}
             </Text>
           ) : null}
 
-          <View style={styles.cardFooter}>
+          <View style={[styles.cardFooter, { borderTopColor: colors.border }]}>
             <View style={styles.stageIndicator}>
-              <Text style={styles.footerLabel}>Etapa Atual:</Text>
+              <Text style={[styles.footerLabel, { color: colors.textSecondary }]}>Etapa Atual:</Text>
               {activeStage ? (
                 <StatusBadge status={activeStage.stage} size="small" />
               ) : (
@@ -166,8 +173,8 @@ export default function ProductionListScreen({ navigation }) {
               )}
             </View>
 
-            <View style={styles.equipmentIndicator}>
-              <Text style={styles.equipmentBadgeText}>
+            <View style={[styles.equipmentIndicator, { backgroundColor: isDark ? '#1E3A8A33' : '#EFF6FF' }]}>
+              <Text style={[styles.equipmentBadgeText, { color: isDark ? '#93C5FD' : '#1E40AF' }]}>
                 🎬 {eqCount} {eqCount === 1 ? 'item' : 'itens'}
               </Text>
             </View>
@@ -264,9 +271,9 @@ export default function ProductionListScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Abas Superiores de Alternância */}
-      <View style={styles.topTabs}>
+      <View style={[styles.topTabs, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity
           style={[styles.topTab, activeTab === 'ALL_PRODUCTIONS' && styles.activeTopTab]}
           onPress={() => handleTabChange('ALL_PRODUCTIONS')}
@@ -274,6 +281,7 @@ export default function ProductionListScreen({ navigation }) {
           <Text
             style={[
               styles.topTabText,
+              { color: activeTab === 'ALL_PRODUCTIONS' ? colors.brand.primary : colors.textSecondary },
               activeTab === 'ALL_PRODUCTIONS' && styles.activeTopTabText,
             ]}
           >
@@ -288,6 +296,7 @@ export default function ProductionListScreen({ navigation }) {
           <Text
             style={[
               styles.topTabText,
+              { color: activeTab === 'MY_PENDING' ? colors.brand.primary : colors.textSecondary },
               activeTab === 'MY_PENDING' && styles.activeTopTabText,
             ]}
           >
@@ -298,20 +307,20 @@ export default function ProductionListScreen({ navigation }) {
 
       {/* Barra de Busca e Filtros de Status (Apenas na aba Todas as Produções) */}
       {activeTab === 'ALL_PRODUCTIONS' && (
-        <View style={styles.filterSection}>
-          <View style={styles.searchBar}>
+        <View style={[styles.filterSection, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+          <View style={[styles.searchBar, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
             <Text style={styles.searchIcon}>🔍</Text>
             <TextInput
-              style={styles.searchInput}
-              placeholder="Buscar por título ou descrição..."
-              placeholderTextColor={COLORS.light.textMuted}
+              style={[styles.searchInput, { color: colors.textPrimary }]}
+              placeholder="Buscar por título, cliente ou descrição..."
+              placeholderTextColor={colors.textMuted}
               value={searchQuery}
               onChangeText={setSearchQuery}
               clearButtonMode="while-editing"
             />
-            {searchQuery !== '' && (
+            {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearBtn}>
-                <Text style={styles.clearBtnText}>✕</Text>
+                <Text style={[styles.clearBtnText, { color: colors.textSecondary }]}>✕</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -330,14 +339,19 @@ export default function ProductionListScreen({ navigation }) {
                 <TouchableOpacity
                   style={[
                     styles.statusChip,
-                    isSelected && styles.activeStatusChip,
+                    {
+                      backgroundColor: isSelected
+                        ? colors.brand.primary
+                        : colors.surfaceSubtle,
+                      borderColor: isSelected ? colors.brand.primary : colors.border,
+                    },
                   ]}
                   onPress={() => setSelectedStatus(item.key)}
                 >
                   <Text
                     style={[
                       styles.statusChipText,
-                      isSelected && styles.activeStatusChipText,
+                      { color: isSelected ? '#FFFFFF' : colors.textSecondary },
                     ]}
                   >
                     {item.label}
@@ -345,13 +359,13 @@ export default function ProductionListScreen({ navigation }) {
                   <View
                     style={[
                       styles.chipCountBadge,
-                      isSelected && styles.activeChipCountBadge,
+                      { backgroundColor: isSelected ? 'rgba(255,255,255,0.25)' : (isDark ? colors.border : '#E2E8F0') },
                     ]}
                   >
                     <Text
                       style={[
                         styles.chipCountText,
-                        isSelected && styles.activeChipCountText,
+                        { color: isSelected ? '#FFFFFF' : colors.textPrimary },
                       ]}
                     >
                       {count}
