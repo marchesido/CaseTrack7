@@ -12,10 +12,12 @@ import CustomButton from '../components/CustomButton';
 import CustomInput from '../components/CustomInput';
 import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import showAlert from '../utils/alert';
 
 export default function HomeScreen({ navigation }) {
   const { user, logout, isAdmin } = useAuth();
+  const { colors, isDark } = useTheme();
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -53,23 +55,35 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
       keyboardShouldPersistTaps="handled"
     >
       {/* Barra de Perfil e Logout */}
-      <View style={styles.userBar}>
+      <View
+        style={[
+          styles.userBar,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
+        ]}
+      >
         <View style={styles.userInfo}>
-          <Text style={styles.greetingText}>Olá, {user?.name || 'Profissional'}!</Text>
+          <Text style={[styles.greetingText, { color: colors.textPrimary }]}>
+            Olá, {user?.name || 'Profissional'}!
+          </Text>
           <View
             style={[
               styles.roleBadge,
-              isAdmin ? styles.roleBadgeAdmin : styles.roleBadgeUser,
+              isAdmin
+                ? { backgroundColor: isDark ? '#1E3A8A44' : '#EFF6FF', borderColor: '#3B82F6' }
+                : { backgroundColor: isDark ? '#065F4644' : '#ECFDF5', borderColor: '#10B981' },
             ]}
           >
             <Text
               style={[
                 styles.roleBadgeText,
-                isAdmin ? styles.roleBadgeTextAdmin : styles.roleBadgeTextUser,
+                { color: isAdmin ? (isDark ? '#93C5FD' : '#1E40AF') : (isDark ? '#6EE7B7' : '#065F46') },
               ]}
             >
               {isAdmin ? '👑 Administrador' : '👤 Freelancer / Operador'}
@@ -78,18 +92,31 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <TouchableOpacity
-          style={styles.logoutButton}
+          style={[
+            styles.logoutButton,
+            {
+              backgroundColor: isDark ? '#3B1212' : '#FEF2F2',
+              borderColor: isDark ? '#7F1D1D' : '#FECACA',
+            },
+          ]}
           onPress={handleLogout}
           activeOpacity={0.8}
         >
-          <Text style={styles.logoutButtonText}>Sair</Text>
+          <Text style={[styles.logoutButtonText, { color: isDark ? '#F87171' : '#DC2626' }]}>
+            Sair
+          </Text>
         </TouchableOpacity>
       </View>
 
+
       {/* Card de Busca Rápida */}
       <Card style={styles.cardSpacing}>
-        <Text style={styles.cardTitle}>Busca de Equipamentos</Text>
-        <Text style={styles.cardSubtitle}>Encontre rapidamente itens no acervo</Text>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+          🔍 Busca de Equipamentos
+        </Text>
+        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+          Encontre rapidamente itens no acervo
+        </Text>
 
         <CustomInput
           label="Nome ou código do equipamento"
@@ -107,45 +134,63 @@ export default function HomeScreen({ navigation }) {
 
       {/* Card de Produções */}
       <Card style={styles.cardSpacing}>
-        <Text style={styles.cardTitle}>🎬 Produções Audiovisuais</Text>
-        <Text style={styles.cardSubtitle}>Ciclo de 4 etapas, checklists e movimentações</Text>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+          🎬 Produções Audiovisuais
+        </Text>
+        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+          Ciclo de 4 etapas, checklists e movimentações
+        </Text>
 
         <CustomButton
           title="Ver Produções & Etapas"
           onPress={() => navigation.navigate('ProductionList')}
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            { backgroundColor: isDark ? colors.surfaceSubtle : '#4B5563' },
+          ]}
         />
 
         {isAdmin && (
           <CustomButton
             title="Nova Produção"
             onPress={() => navigation.navigate('ProductionForm')}
-            style={[styles.actionButton, styles.primaryActionButton]}
+            style={[styles.actionButton, { backgroundColor: colors.brand.primary }]}
           />
         )}
       </Card>
 
       {/* Card de Gestão do Acervo */}
       <Card>
-        <Text style={styles.cardTitle}>📦 Gestão do Acervo</Text>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>
+          📦 Gestão do Acervo
+        </Text>
         <CustomButton
           title="Listar Equipamentos"
           onPress={() => navigation.navigate('EquipmentList')}
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            { backgroundColor: isDark ? colors.surfaceSubtle : '#4B5563' },
+          ]}
         />
 
         {isAdmin && (
           <CustomButton
             title="Novo Equipamento"
             onPress={() => navigation.navigate('EquipmentForm')}
-            style={styles.actionButton}
+            style={[
+              styles.actionButton,
+              { backgroundColor: isDark ? colors.surfaceSubtle : '#4B5563' },
+            ]}
           />
         )}
 
         <CustomButton
           title="Registrar Avaria com Foto"
           onPress={() => navigation.navigate('DamageForm')}
-          style={styles.actionButton}
+          style={[
+            styles.actionButton,
+            { backgroundColor: isDark ? colors.surfaceSubtle : '#4B5563' },
+          ]}
         />
       </Card>
     </ScrollView>
@@ -155,24 +200,20 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#F5F7FA',
     padding: 20,
   },
   userBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 14,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
     elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   userInfo: {
     flex: 1,
@@ -180,7 +221,6 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#0F172A',
   },
   roleBadge: {
     alignSelf: 'flex-start',
@@ -188,37 +228,19 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 6,
     marginTop: 4,
-  },
-  roleBadgeAdmin: {
-    backgroundColor: '#EFF6FF',
-    borderColor: '#BFDBFE',
-    borderWidth: 1,
-  },
-  roleBadgeUser: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
     borderWidth: 1,
   },
   roleBadgeText: {
     fontSize: 12,
     fontWeight: '600',
   },
-  roleBadgeTextAdmin: {
-    color: '#1E40AF',
-  },
-  roleBadgeTextUser: {
-    color: '#065F46',
-  },
   logoutButton: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
   },
   logoutButtonText: {
-    color: '#DC2626',
     fontWeight: '700',
     fontSize: 13,
   },
@@ -228,19 +250,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1f2937',
     marginBottom: 8,
   },
   cardSubtitle: {
     fontSize: 14,
-    color: '#6b7280',
     marginBottom: 16,
   },
   actionButton: {
-    backgroundColor: '#4B5563',
     marginBottom: 12,
-  },
-  primaryActionButton: {
-    backgroundColor: '#1E3A8A',
   },
 });
