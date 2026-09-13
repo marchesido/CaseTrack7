@@ -18,6 +18,7 @@ import equipmentService from '../services/equipmentService';
 import uploadService from '../services/uploadService';
 import showAlert from '../utils/alert';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const STATUS_OPTIONS = [
   { value: 'DISPONIVEL', label: 'Disponível', activeColor: '#10B981', bgColor: '#ECFDF5' },
@@ -27,6 +28,7 @@ const STATUS_OPTIONS = [
 
 export default function EquipmentFormScreen({ navigation, route }) {
   const { isAdmin } = useAuth();
+  const { colors, isDark } = useTheme();
 
   useEffect(() => {
     if (!isAdmin) {
@@ -206,25 +208,25 @@ export default function EquipmentFormScreen({ navigation, route }) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.keyboardContainer}
+      style={[styles.keyboardContainer, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
         keyboardShouldPersistTaps="handled"
       >
         <Card style={styles.card}>
-          <Text style={styles.title}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>
             {isEditing ? 'Editar Equipamento' : 'Novo Equipamento'}
           </Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             {isEditing
               ? 'Atualize as informações do item selecionado'
               : 'Preencha os dados do equipamento para registrá-lo no acervo'}
           </Text>
 
           {/* Seção de Anexo de Foto */}
-          <Text style={styles.label}>Foto do Equipamento</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Foto do Equipamento</Text>
           <View style={styles.imageSection}>
             {imageUri ? (
               <View style={styles.previewContainer}>
@@ -237,18 +239,18 @@ export default function EquipmentFormScreen({ navigation, route }) {
                 )}
                 <View style={styles.imageActionsRow}>
                   <TouchableOpacity
-                    style={styles.changePhotoButton}
+                    style={[styles.changePhotoButton, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}
                     onPress={handlePickFromGallery}
                     disabled={loading || uploadingImage}
                   >
-                    <Text style={styles.changePhotoText}>🖼️ Galeria</Text>
+                    <Text style={[styles.changePhotoText, { color: colors.textPrimary }]}>🖼️ Galeria</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.changePhotoButton}
+                    style={[styles.changePhotoButton, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}
                     onPress={handleTakePhoto}
                     disabled={loading || uploadingImage}
                   >
-                    <Text style={styles.changePhotoText}>📷 Câmera</Text>
+                    <Text style={[styles.changePhotoText, { color: colors.textPrimary }]}>📷 Câmera</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.removePhotoButton}
@@ -260,10 +262,10 @@ export default function EquipmentFormScreen({ navigation, route }) {
                 </View>
               </View>
             ) : (
-              <View style={styles.noPhotoPlaceholder}>
+              <View style={[styles.noPhotoPlaceholder, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
                 <Text style={styles.noPhotoIcon}>📷</Text>
-                <Text style={styles.noPhotoTitle}>Nenhuma foto anexada</Text>
-                <Text style={styles.noPhotoSubtitle}>
+                <Text style={[styles.noPhotoTitle, { color: colors.textPrimary }]}>Nenhuma foto anexada</Text>
+                <Text style={[styles.noPhotoSubtitle, { color: colors.textMuted }]}>
                   Tire uma foto do equipamento ou selecione um arquivo da galeria (PNG/JPG até 5MB)
                 </Text>
                 <View style={styles.pickerButtonsRow}>
@@ -316,7 +318,7 @@ export default function EquipmentFormScreen({ navigation, route }) {
             style={styles.multilineInput}
           />
 
-          <Text style={styles.label}>Status Operacional</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Status Operacional</Text>
           <View style={styles.statusGroup}>
             {STATUS_OPTIONS.map((opt) => {
               const isSelected = status === opt.value;
@@ -325,9 +327,11 @@ export default function EquipmentFormScreen({ navigation, route }) {
                   key={opt.value}
                   style={[
                     styles.statusChip,
-                    isSelected && {
-                      borderColor: opt.activeColor,
-                      backgroundColor: opt.bgColor,
+                    {
+                      backgroundColor: isSelected
+                        ? (isDark ? opt.activeColor + '33' : opt.bgColor)
+                        : (isDark ? colors.surfaceSubtle : '#F8FAFC'),
+                      borderColor: isSelected ? opt.activeColor : colors.border,
                     },
                   ]}
                   onPress={() => setStatus(opt.value)}
@@ -342,7 +346,10 @@ export default function EquipmentFormScreen({ navigation, route }) {
                   <Text
                     style={[
                       styles.statusText,
-                      isSelected && { color: opt.activeColor, fontWeight: '700' },
+                      {
+                        color: isSelected ? opt.activeColor : colors.textSecondary,
+                        fontWeight: isSelected ? '700' : '500',
+                      },
                     ]}
                   >
                     {opt.label}
@@ -367,11 +374,18 @@ export default function EquipmentFormScreen({ navigation, route }) {
             />
 
             <TouchableOpacity
-              style={styles.cancelButton}
+              style={[
+                styles.cancelButton,
+                {
+                  backgroundColor: isDark ? colors.surfaceSubtle : '#F3F4F6',
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                },
+              ]}
               onPress={() => navigation.goBack()}
               disabled={loading}
             >
-              <Text style={styles.cancelText}>Cancelar</Text>
+              <Text style={[styles.cancelText, { color: colors.textSecondary }]}>Cancelar</Text>
             </TouchableOpacity>
           </View>
         </Card>

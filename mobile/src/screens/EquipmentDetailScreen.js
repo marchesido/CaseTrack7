@@ -19,9 +19,11 @@ import damageService from '../services/damageService';
 import uploadService from '../services/uploadService';
 import showAlert from '../utils/alert';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function EquipmentDetailScreen({ navigation, route }) {
   const { isAdmin } = useAuth();
+  const { colors, isDark } = useTheme();
   const initialEquipment = route.params?.equipment;
   const equipmentId = initialEquipment?.id || route.params?.equipmentId;
 
@@ -74,13 +76,13 @@ export default function EquipmentDetailScreen({ navigation, route }) {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'DISPONIVEL':
-        return { label: 'Disponível', bg: '#ECFDF5', color: '#065F46', border: '#A7F3D0' };
+        return { label: 'Disponível', bg: isDark ? '#065F4644' : '#ECFDF5', color: isDark ? '#6EE7B7' : '#065F46', border: isDark ? '#059669' : '#A7F3D0' };
       case 'EM_USO':
-        return { label: 'Em Uso', bg: '#FFFBEB', color: '#92400E', border: '#FDE68A' };
+        return { label: 'Em Uso', bg: isDark ? '#78350F44' : '#FFFBEB', color: isDark ? '#FCD34D' : '#92400E', border: isDark ? '#D97706' : '#FDE68A' };
       case 'MANUTENCAO':
-        return { label: 'Em Manutenção', bg: '#FEF2F2', color: '#991B1B', border: '#FECACA' };
+        return { label: 'Em Manutenção', bg: isDark ? '#7F1D1D44' : '#FEF2F2', color: isDark ? '#FCA5A5' : '#991B1B', border: isDark ? '#DC2626' : '#FECACA' };
       default:
-        return { label: status || 'Desconhecido', bg: '#F3F4F6', color: '#374151', border: '#E5E7EB' };
+        return { label: status || 'Desconhecido', bg: isDark ? '#1E293B' : '#F3F4F6', color: isDark ? '#94A3B8' : '#374151', border: isDark ? '#334155' : '#E5E7EB' };
     }
   };
 
@@ -129,9 +131,9 @@ export default function EquipmentDetailScreen({ navigation, route }) {
   const fullEquipmentImageUrl = uploadService.getFullImageUrl(equipment?.imageUrl);
 
   return (
-    <View style={styles.mainContainer}>
+    <View style={[styles.mainContainer, { backgroundColor: colors.background }]}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -144,7 +146,7 @@ export default function EquipmentDetailScreen({ navigation, route }) {
         <Card style={styles.equipmentCard}>
           {fullEquipmentImageUrl ? (
             <TouchableOpacity
-              activeOpacity={0.9}
+              activeOpacity={0.85}
               onPress={() =>
                 setPreviewImage({
                   uri: fullEquipmentImageUrl,
@@ -164,15 +166,15 @@ export default function EquipmentDetailScreen({ navigation, route }) {
               </View>
             </TouchableOpacity>
           ) : (
-            <View style={styles.placeholderContainer}>
+            <View style={[styles.placeholderContainer, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
               <Text style={styles.placeholderIcon}>🎥</Text>
-              <Text style={styles.placeholderText}>Sem foto cadastrada</Text>
+              <Text style={[styles.placeholderText, { color: colors.textMuted }]}>Sem foto cadastrada</Text>
             </View>
           )}
 
           <View style={styles.equipmentInfo}>
             <View style={styles.titleRow}>
-              <Text style={styles.equipmentName}>{equipment?.name}</Text>
+              <Text style={[styles.equipmentName, { color: colors.textPrimary }]}>{equipment?.name}</Text>
               <View
                 style={[
                   styles.statusBadge,
@@ -185,41 +187,41 @@ export default function EquipmentDetailScreen({ navigation, route }) {
 
             {equipment?.serialNumber ? (
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Nº de Série:</Text>
-                <Text style={styles.metaValue}>{equipment.serialNumber}</Text>
+                <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>Nº de Série:</Text>
+                <Text style={[styles.metaValue, { color: colors.textPrimary }]}>{equipment.serialNumber}</Text>
               </View>
             ) : null}
 
             {equipment?.description ? (
-              <View style={styles.descriptionSection}>
-                <Text style={styles.sectionHeading}>Descrição do Item</Text>
-                <Text style={styles.descriptionContent}>{equipment.description}</Text>
+              <View style={[styles.descriptionSection, { borderTopColor: colors.border }]}>
+                <Text style={[styles.sectionHeading, { color: colors.textSecondary }]}>Descrição do Item</Text>
+                <Text style={[styles.descriptionContent, { color: colors.textMuted }]}>{equipment.description}</Text>
               </View>
             ) : null}
 
             {equipment?.createdAt ? (
               <View style={styles.metaRow}>
-                <Text style={styles.metaLabel}>Cadastrado em:</Text>
-                <Text style={styles.metaValueSmall}>{formatDate(equipment.createdAt)}</Text>
+                <Text style={[styles.metaLabel, { color: colors.textSecondary }]}>Cadastrado em:</Text>
+                <Text style={[styles.metaValueSmall, { color: colors.textMuted }]}>{formatDate(equipment.createdAt)}</Text>
               </View>
             ) : null}
 
             {/* Ações Rápidas do Equipamento */}
-            <View style={styles.quickActionsRow}>
+            <View style={[styles.quickActionsRow, { borderTopColor: colors.border }]}>
               {isAdmin && (
                 <TouchableOpacity
-                  style={[styles.actionBtn, styles.editActionBtn]}
+                  style={[styles.actionBtn, styles.editActionBtn, isDark && { backgroundColor: '#1E3A8A33', borderColor: '#1E3A8A' }]}
                   onPress={() => navigation.navigate('EquipmentForm', { equipment })}
                 >
-                  <Text style={styles.editActionText}>✏️ Editar Item</Text>
+                  <Text style={[styles.editActionText, isDark && { color: '#93C5FD' }]}>✏️ Editar Item</Text>
                 </TouchableOpacity>
               )}
 
               <TouchableOpacity
-                style={[styles.actionBtn, styles.damageActionBtn]}
+                style={[styles.actionBtn, styles.damageActionBtn, isDark && { backgroundColor: '#78350F33', borderColor: '#B45309' }]}
                 onPress={() => navigation.navigate('DamageForm', { equipment })}
               >
-                <Text style={styles.damageActionText}>⚠️ Reportar Avaria</Text>
+                <Text style={[styles.damageActionText, isDark && { color: '#FCD34D' }]}>⚠️ Reportar Avaria</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -228,7 +230,7 @@ export default function EquipmentDetailScreen({ navigation, route }) {
         {/* Seção de Histórico de Avarias */}
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
-            <Text style={styles.sectionTitle}>Histórico de Avarias</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Histórico de Avarias</Text>
             <View
               style={[
                 styles.countBadge,
@@ -256,8 +258,8 @@ export default function EquipmentDetailScreen({ navigation, route }) {
         {damages.length === 0 ? (
           <Card style={styles.emptyDamagesCard}>
             <Text style={styles.emptyIcon}>🛡️</Text>
-            <Text style={styles.emptyTitle}>Nenhuma avaria registrada</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>Nenhuma avaria registrada</Text>
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
               Este equipamento não possui histórico de danos ou avarias registradas e está pronto para uso operacional.
             </Text>
             <CustomButton

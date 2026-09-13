@@ -19,6 +19,7 @@ import equipmentService from '../services/equipmentService';
 import uploadService from '../services/uploadService';
 import showAlert from '../utils/alert';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 const STATUS_TABS = [
   { key: 'ALL', label: 'Todos', activeColor: '#1E3A8A', bgColor: '#EFF6FF', textColor: '#1E3A8A' },
@@ -29,7 +30,9 @@ const STATUS_TABS = [
 
 export default function EquipmentListScreen({ navigation, route }) {
   const { isAdmin } = useAuth();
+  const { colors, isDark } = useTheme();
   const [equipments, setEquipments] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -136,13 +139,13 @@ export default function EquipmentListScreen({ navigation, route }) {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'DISPONIVEL':
-        return { label: 'Disponível', bg: '#ECFDF5', color: '#065F46' };
+        return { label: 'Disponível', bg: isDark ? '#065F4644' : '#ECFDF5', color: isDark ? '#6EE7B7' : '#065F46' };
       case 'EM_USO':
-        return { label: 'Em Uso', bg: '#FFFBEB', color: '#92400E' };
+        return { label: 'Em Uso', bg: isDark ? '#78350F44' : '#FFFBEB', color: isDark ? '#FCD34D' : '#92400E' };
       case 'MANUTENCAO':
-        return { label: 'Manutenção', bg: '#FEF2F2', color: '#991B1B' };
+        return { label: 'Manutenção', bg: isDark ? '#7F1D1D44' : '#FEF2F2', color: isDark ? '#FCA5A5' : '#991B1B' };
       default:
-        return { label: status || 'Desconhecido', bg: '#F3F4F6', color: '#374151' };
+        return { label: status || 'Desconhecido', bg: isDark ? '#1E293B' : '#F3F4F6', color: isDark ? '#94A3B8' : '#374151' };
     }
   };
 
@@ -174,7 +177,7 @@ export default function EquipmentListScreen({ navigation, route }) {
               </View>
             </TouchableOpacity>
           ) : (
-            <View style={styles.thumbnailPlaceholder}>
+            <View style={[styles.thumbnailPlaceholder, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
               <Text style={styles.placeholderIcon}>🎥</Text>
             </View>
           )}
@@ -185,7 +188,7 @@ export default function EquipmentListScreen({ navigation, route }) {
             onPress={() => navigation.navigate('EquipmentDetail', { equipment: item })}
           >
             <View style={styles.cardHeader}>
-              <Text style={styles.equipmentName} numberOfLines={1}>
+              <Text style={[styles.equipmentName, { color: colors.textPrimary }]} numberOfLines={1}>
                 {item.name}
               </Text>
               <View style={[styles.badge, { backgroundColor: badge.bg }]}>
@@ -194,49 +197,49 @@ export default function EquipmentListScreen({ navigation, route }) {
             </View>
 
             {item.serialNumber ? (
-              <Text style={styles.serialText}>S/N: {item.serialNumber}</Text>
+              <Text style={[styles.serialText, { color: colors.textSecondary }]}>S/N: {item.serialNumber}</Text>
             ) : null}
 
             {item.description ? (
-              <Text style={styles.descriptionText} numberOfLines={2}>
+              <Text style={[styles.descriptionText, { color: colors.textMuted }]} numberOfLines={2}>
                 {item.description}
               </Text>
             ) : null}
 
-            <Text style={styles.viewDetailHint}>Ver detalhes e avarias ›</Text>
+            <Text style={[styles.viewDetailHint, { color: colors.brand.primaryLight }]}>Ver detalhes e avarias ›</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.actionsContainer}>
+        <View style={[styles.actionsContainer, { borderTopColor: colors.border }]}>
           <TouchableOpacity
-            style={[styles.actionBtn, styles.detailBtn]}
+            style={[styles.actionBtn, styles.detailBtn, isDark && { backgroundColor: '#1E3A8A33', borderColor: '#1E3A8A' }]}
             onPress={() => navigation.navigate('EquipmentDetail', { equipment: item })}
           >
-            <Text style={styles.detailBtnText}>👁️ Detalhes</Text>
+            <Text style={[styles.detailBtnText, isDark && { color: '#93C5FD' }]}>👁️ Detalhes</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionBtn, styles.damageBtn]}
+            style={[styles.actionBtn, styles.damageBtn, isDark && { backgroundColor: '#78350F33', borderColor: '#B45309' }]}
             onPress={() => navigation.navigate('DamageForm', { equipment: item })}
           >
-            <Text style={styles.damageBtnText}>⚠️ Avaria</Text>
+            <Text style={[styles.damageBtnText, isDark && { color: '#FCD34D' }]}>⚠️ Avaria</Text>
           </TouchableOpacity>
 
           {isAdmin && (
             <TouchableOpacity
-              style={[styles.actionBtn, styles.editBtn]}
+              style={[styles.actionBtn, styles.editBtn, isDark && { backgroundColor: '#312E8133', borderColor: '#4338CA' }]}
               onPress={() => navigation.navigate('EquipmentForm', { equipment: item })}
             >
-              <Text style={styles.editBtnText}>Editar</Text>
+              <Text style={[styles.editBtnText, isDark && { color: '#A5B4FC' }]}>Editar</Text>
             </TouchableOpacity>
           )}
 
           {isAdmin && (
             <TouchableOpacity
-              style={[styles.actionBtn, styles.deleteBtn]}
+              style={[styles.actionBtn, styles.deleteBtn, isDark && { backgroundColor: '#7F1D1D33', borderColor: '#B91C1C' }]}
               onPress={() => handleDelete(item)}
             >
-              <Text style={styles.deleteBtnText}>Excluir</Text>
+              <Text style={[styles.deleteBtnText, isDark && { color: '#FCA5A5' }]}>Excluir</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -245,10 +248,10 @@ export default function EquipmentListScreen({ navigation, route }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Barra de Topo com Total e Botão de Novo */}
-      <View style={styles.topBar}>
-        <Text style={styles.totalCount}>
+      <View style={[styles.topBar, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <Text style={[styles.totalCount, { color: colors.textSecondary }]}>
           Total: {equipments.length} item(ns)
         </Text>
         {isAdmin && (
@@ -262,13 +265,13 @@ export default function EquipmentListScreen({ navigation, route }) {
       </View>
 
       {/* Barra de Pesquisa */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputWrapper}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.searchInputWrapper, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
           <Text style={styles.searchIcon}>🔍</Text>
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.textPrimary }]}
             placeholder="Buscar por nome, S/N ou descrição..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
@@ -280,14 +283,14 @@ export default function EquipmentListScreen({ navigation, route }) {
               style={styles.clearSearchBtn}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Text style={styles.clearSearchBtnText}>✕</Text>
+              <Text style={[styles.clearSearchBtnText, { color: colors.textSecondary }]}>✕</Text>
             </TouchableOpacity>
           )}
         </View>
       </View>
 
       {/* Chips de Filtro de Status */}
-      <View style={styles.statusChipsContainer}>
+      <View style={[styles.statusChipsContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         {STATUS_TABS.map((tab) => {
           const isSelected = selectedStatus === tab.key;
           const count = statusCounts[tab.key] || 0;
@@ -296,9 +299,11 @@ export default function EquipmentListScreen({ navigation, route }) {
               key={tab.key}
               style={[
                 styles.statusChip,
-                isSelected && {
-                  backgroundColor: tab.bgColor,
-                  borderColor: tab.activeColor,
+                {
+                  backgroundColor: isSelected
+                    ? (isDark ? tab.activeColor + '33' : tab.bgColor)
+                    : (isDark ? colors.surfaceSubtle : '#F8FAFC'),
+                  borderColor: isSelected ? tab.activeColor : colors.border,
                 },
               ]}
               onPress={() => setSelectedStatus(tab.key)}
@@ -307,9 +312,9 @@ export default function EquipmentListScreen({ navigation, route }) {
               <Text
                 style={[
                   styles.statusChipText,
-                  isSelected && {
-                    color: tab.textColor,
-                    fontWeight: '700',
+                  {
+                    color: isSelected ? (isDark ? '#F8FAFC' : tab.textColor) : colors.textSecondary,
+                    fontWeight: isSelected ? '700' : '500',
                   },
                 ]}
               >
@@ -321,13 +326,13 @@ export default function EquipmentListScreen({ navigation, route }) {
       </View>
 
       {/* Linha de Feedback de Resultados e Limpeza */}
-      <View style={styles.feedbackRow}>
-        <Text style={styles.feedbackText}>
+      <View style={[styles.feedbackRow, { backgroundColor: isDark ? colors.surfaceSubtle : '#F8FAFC' }]}>
+        <Text style={[styles.feedbackText, { color: colors.textSecondary }]}>
           Exibindo {filteredEquipments.length} de {equipments.length} equipamentos
         </Text>
         {isFilterActive && (
-          <TouchableOpacity onPress={handleClearFilters} style={styles.clearFiltersBtn}>
-            <Text style={styles.clearFiltersText}>Limpar filtros ✕</Text>
+          <TouchableOpacity onPress={handleClearFilters} style={[styles.clearFiltersBtn, { backgroundColor: colors.border }]}>
+            <Text style={[styles.clearFiltersText, { color: colors.textPrimary }]}>Limpar filtros ✕</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -370,8 +375,8 @@ export default function EquipmentListScreen({ navigation, route }) {
               <View style={styles.emptyContainer}>
                 {equipments.length === 0 ? (
                   <>
-                    <Text style={styles.emptyTitle}>Nenhum equipamento cadastrado</Text>
-                    <Text style={styles.emptySubtitle}>
+                    <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>Nenhum equipamento cadastrado</Text>
+                    <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
                       Cadastre novos equipamentos para acompanhar o acervo da produtora.
                     </Text>
                     <CustomButton
@@ -383,8 +388,8 @@ export default function EquipmentListScreen({ navigation, route }) {
                 ) : (
                   <>
                     <Text style={styles.emptyIcon}>🔍</Text>
-                    <Text style={styles.emptyTitle}>Nenhum item encontrado</Text>
-                    <Text style={styles.emptySubtitle}>
+                    <Text style={[styles.emptyTitle, { color: colors.textPrimary }]}>Nenhum item encontrado</Text>
+                    <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
                       Nenhum equipamento corresponde aos filtros e termos de busca aplicados.
                     </Text>
                     <CustomButton

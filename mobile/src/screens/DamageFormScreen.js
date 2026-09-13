@@ -21,11 +21,13 @@ import ImageZoomModal from '../components/ImageZoomModal';
 import equipmentService from '../services/equipmentService';
 import damageService from '../services/damageService';
 import showAlert from '../utils/alert';
+import { useTheme } from '../contexts/ThemeContext';
 
 const MAX_PHOTOS = 4;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export default function DamageFormScreen({ navigation, route }) {
+  const { colors, isDark } = useTheme();
   const preSelectedEquipment = route.params?.equipment;
 
   const [equipments, setEquipments] = useState([]);
@@ -331,27 +333,27 @@ export default function DamageFormScreen({ navigation, route }) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
         keyboardShouldPersistTaps="handled"
       >
         <Card style={styles.card}>
-          <Text style={styles.title}>Registrar Avaria</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>Registrar Avaria</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Documente danos físicos com menu de seleção rápida e até {MAX_PHOTOS} evidências fotográficas
           </Text>
 
           {/* Seleção do Equipamento via Dropdown Modal com Busca */}
-          <Text style={styles.label}>Equipamento Avariado *</Text>
+          <Text style={[styles.label, { color: colors.textSecondary }]}>Equipamento Avariado *</Text>
           {preSelectedEquipment ? (
-            <View style={styles.preSelectedBox}>
+            <View style={[styles.preSelectedBox, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
               <View style={styles.preSelectedInfo}>
-                <Text style={styles.preSelectedName}>{preSelectedEquipment.name}</Text>
+                <Text style={[styles.preSelectedName, { color: colors.textPrimary }]}>{preSelectedEquipment.name}</Text>
                 {preSelectedEquipment.serialNumber ? (
-                  <Text style={styles.preSelectedSerial}>
+                  <Text style={[styles.preSelectedSerial, { color: colors.textSecondary }]}>
                     S/N: {preSelectedEquipment.serialNumber}
                   </Text>
                 ) : null}
@@ -361,11 +363,12 @@ export default function DamageFormScreen({ navigation, route }) {
               </View>
             </View>
           ) : loadingEquipments ? (
-            <ActivityIndicator size="small" color="#1E3A8A" style={styles.loadingSpinner} />
+            <ActivityIndicator size="small" color={colors.brand.primary} style={styles.loadingSpinner} />
           ) : (
             <TouchableOpacity
               style={[
                 styles.dropdownTrigger,
+                { backgroundColor: colors.surfaceSubtle, borderColor: colors.border },
                 errors.equipment && styles.dropdownTriggerError,
               ]}
               onPress={() => setSelectorModalVisible(true)}
@@ -376,22 +379,22 @@ export default function DamageFormScreen({ navigation, route }) {
                 <View style={styles.dropdownTriggerTextWrapper}>
                   {currentEquipment ? (
                     <>
-                      <Text style={styles.dropdownSelectedTitle} numberOfLines={1}>
+                      <Text style={[styles.dropdownSelectedTitle, { color: colors.textPrimary }]} numberOfLines={1}>
                         {currentEquipment.name}
                       </Text>
-                      <Text style={styles.dropdownSelectedSerial} numberOfLines={1}>
+                      <Text style={[styles.dropdownSelectedSerial, { color: colors.textSecondary }]} numberOfLines={1}>
                         S/N: {currentEquipment.serialNumber || 'Não informado'} • Status:{' '}
                         {currentEquipment.status || 'Ativo'}
                       </Text>
                     </>
                   ) : (
-                    <Text style={styles.dropdownPlaceholder}>
+                    <Text style={[styles.dropdownPlaceholder, { color: colors.textMuted }]}>
                       Selecione um equipamento do acervo...
                     </Text>
                   )}
                 </View>
               </View>
-              <Text style={styles.dropdownChevron}>▾</Text>
+              <Text style={[styles.dropdownChevron, { color: colors.textSecondary }]}>▾</Text>
             </TouchableOpacity>
           )}
 
@@ -416,8 +419,8 @@ export default function DamageFormScreen({ navigation, route }) {
 
           {/* Seção de Fotos (Até 4 Fotos) */}
           <View style={styles.photoHeaderRow}>
-            <Text style={styles.label}>Evidências Fotográficas *</Text>
-            <Text style={styles.photoCounter}>
+            <Text style={[styles.label, { color: colors.textSecondary }]}>Evidências Fotográficas *</Text>
+            <Text style={[styles.photoCounter, { color: colors.textMuted }]}>
               {photos.length} de {MAX_PHOTOS} anexadas
             </Text>
           </View>
@@ -455,10 +458,10 @@ export default function DamageFormScreen({ navigation, route }) {
               ))}
             </View>
           ) : (
-            <View style={styles.emptyPhotoBox}>
+            <View style={[styles.emptyPhotoBox, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
               <Text style={styles.emptyPhotoIcon}>📸</Text>
-              <Text style={styles.emptyPhotoTitle}>Nenhuma evidência anexada</Text>
-              <Text style={styles.emptyPhotoSubtitle}>
+              <Text style={[styles.emptyPhotoTitle, { color: colors.textPrimary }]}>Nenhuma evidência anexada</Text>
+              <Text style={[styles.emptyPhotoSubtitle, { color: colors.textMuted }]}>
                 Adicione até 4 fotos nítidas para comprovação pericial da avaria
               </Text>
             </View>
@@ -504,24 +507,24 @@ export default function DamageFormScreen({ navigation, route }) {
         onRequestClose={() => setSelectorModalVisible(false)}
       >
         <View style={styles.selectorModalBackdrop}>
-          <View style={styles.selectorModalContent}>
-            <View style={styles.selectorModalHeader}>
-              <Text style={styles.selectorModalTitle}>Selecionar Equipamento</Text>
+          <View style={[styles.selectorModalContent, { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: isDark ? 1 : 0 }]}>
+            <View style={[styles.selectorModalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.selectorModalTitle, { color: colors.textPrimary }]}>Selecionar Equipamento</Text>
               <TouchableOpacity
                 onPress={() => setSelectorModalVisible(false)}
-                style={styles.selectorModalCloseBtn}
+                style={[styles.selectorModalCloseBtn, { backgroundColor: colors.surfaceSubtle }]}
               >
-                <Text style={styles.selectorModalCloseText}>✕</Text>
+                <Text style={[styles.selectorModalCloseText, { color: colors.textSecondary }]}>✕</Text>
               </TouchableOpacity>
             </View>
 
             {/* Campo de Busca em Tempo Real */}
-            <View style={styles.selectorSearchBox}>
+            <View style={[styles.selectorSearchBox, { backgroundColor: colors.surfaceSubtle, borderColor: colors.border }]}>
               <Text style={styles.selectorSearchIcon}>🔍</Text>
               <TextInput
-                style={styles.selectorSearchInput}
+                style={[styles.selectorSearchInput, { color: colors.textPrimary }]}
                 placeholder="Buscar por nome, S/N ou modelo..."
-                placeholderTextColor="#94A3B8"
+                placeholderTextColor={colors.textMuted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 clearButtonMode="while-editing"
@@ -529,7 +532,7 @@ export default function DamageFormScreen({ navigation, route }) {
               />
               {searchQuery.length > 0 && (
                 <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Text style={styles.clearSearchBtnText}>✕</Text>
+                  <Text style={[styles.clearSearchBtnText, { color: colors.textSecondary }]}>✕</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -546,7 +549,8 @@ export default function DamageFormScreen({ navigation, route }) {
                   <TouchableOpacity
                     style={[
                       styles.selectorItemRow,
-                      isSelected && styles.selectorItemRowSelected,
+                      { borderBottomColor: colors.border },
+                      isSelected && [styles.selectorItemRowSelected, { backgroundColor: colors.surfaceSubtle }],
                     ]}
                     onPress={() => {
                       setSelectedEquipmentId(item.id);
@@ -559,8 +563,8 @@ export default function DamageFormScreen({ navigation, route }) {
                     activeOpacity={0.7}
                   >
                     <View style={styles.selectorItemInfo}>
-                      <Text style={styles.selectorItemName}>{item.name}</Text>
-                      <Text style={styles.selectorItemSerial}>
+                      <Text style={[styles.selectorItemName, { color: colors.textPrimary }]}>{item.name}</Text>
+                      <Text style={[styles.selectorItemSerial, { color: colors.textSecondary }]}>
                         S/N: {item.serialNumber || 'Não informado'}
                       </Text>
                     </View>
