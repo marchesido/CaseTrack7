@@ -5,7 +5,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ContractsService } from './contracts.service';
 import { Contract, ContractStatus } from './entities/contract.entity';
-import { Production, ProductionStatus } from '../productions/entities/production.entity';
+import {
+  Production,
+  ProductionStatus,
+} from '../productions/entities/production.entity';
 
 describe('ContractsService', () => {
   let service: ContractsService;
@@ -17,9 +20,11 @@ describe('ContractsService', () => {
     mockContractRepo = {
       findOne: jest.fn(),
       create: jest.fn().mockImplementation((dto) => ({ ...dto })),
-      save: jest.fn().mockImplementation((entity) =>
-        Promise.resolve({ id: entity.id || 1, ...entity }),
-      ),
+      save: jest
+        .fn()
+        .mockImplementation((entity) =>
+          Promise.resolve({ id: entity.id || 1, ...entity }),
+        ),
     };
 
     mockProductionRepo = {
@@ -58,9 +63,9 @@ describe('ContractsService', () => {
     it('deve lançar NotFoundException se a produção não for encontrada', async () => {
       mockProductionRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.generateProductionContract('invalid-uuid')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.generateProductionContract('invalid-uuid'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('deve gerar arquivo PDF em disco e persistir o contrato com status ISSUED', async () => {
@@ -77,7 +82,10 @@ describe('ContractsService', () => {
             type: 'CAPTACAO',
             status: 'PENDING',
             order: 1,
-            responsibleUser: { name: 'Diretor de Fotografia', email: 'dp@casetrack.com' },
+            responsibleUser: {
+              name: 'Diretor de Fotografia',
+              email: 'dp@casetrack.com',
+            },
           },
         ],
         productionEquipments: [
@@ -85,7 +93,10 @@ describe('ContractsService', () => {
             id: 'pe-1',
             isActive: true,
             movementStatus: 'PENDING_CHECKOUT',
-            equipment: { name: 'Câmera Cinema 6K', serialNumber: 'SN-CINEMA-001' },
+            equipment: {
+              name: 'Câmera Cinema 6K',
+              serialNumber: 'SN-CINEMA-001',
+            },
           },
         ],
       };
@@ -164,7 +175,9 @@ describe('ContractsService', () => {
         documento_url: '/uploads/contracts/arquivo-inexistente.pdf',
       });
 
-      await expect(service.getPdfFilePath(99)).rejects.toThrow(NotFoundException);
+      await expect(service.getPdfFilePath(99)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('deve retornar o caminho absoluto se o arquivo existir', async () => {

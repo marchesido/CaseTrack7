@@ -14,7 +14,7 @@ import { Production } from '../productions/entities/production.entity';
 import { SignContractDto } from './dto/sign-contract.dto';
 
 // Importação flexível do pdfkit compatível com CommonJS / ESM
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const PDFDocument = require('pdfkit');
 
 @Injectable()
@@ -45,7 +45,9 @@ export class ContractsService {
     });
 
     if (!production) {
-      throw new NotFoundException(`Produção com ID "${productionId}" não encontrada.`);
+      throw new NotFoundException(
+        `Produção com ID "${productionId}" não encontrada.`,
+      );
     }
 
     // Garante que o diretório uploads/contracts/ exista
@@ -77,7 +79,9 @@ export class ContractsService {
   /**
    * Retorna o termo / contrato emitido mais recente vinculado a uma produção.
    */
-  async getContractByProduction(productionId: string): Promise<Contract | null> {
+  async getContractByProduction(
+    productionId: string,
+  ): Promise<Contract | null> {
     return this.contractRepo.findOne({
       where: { production: { id: productionId } },
       relations: ['production'],
@@ -101,7 +105,9 @@ export class ContractsService {
     });
 
     if (!contract) {
-      throw new NotFoundException(`Contrato com ID ${contractId} não encontrado.`);
+      throw new NotFoundException(
+        `Contrato com ID ${contractId} não encontrado.`,
+      );
     }
 
     return contract;
@@ -110,11 +116,16 @@ export class ContractsService {
   /**
    * Registra a assinatura digital / aceite do termo de responsabilidade.
    */
-  async signContract(contractId: number, dto: SignContractDto): Promise<Contract> {
+  async signContract(
+    contractId: number,
+    dto: SignContractDto,
+  ): Promise<Contract> {
     const contract = await this.getContractById(contractId);
 
     if (contract.status === ContractStatus.CANCELLED) {
-      throw new BadRequestException('Não é possível assinar um contrato cancelado.');
+      throw new BadRequestException(
+        'Não é possível assinar um contrato cancelado.',
+      );
     }
 
     contract.signer_name = dto.signerName;
@@ -137,7 +148,9 @@ export class ContractsService {
 
     const absolutePath = path.join(process.cwd(), relativeUrl);
     if (!fs.existsSync(absolutePath)) {
-      throw new NotFoundException('Arquivo PDF do contrato não encontrado no servidor.');
+      throw new NotFoundException(
+        'Arquivo PDF do contrato não encontrado no servidor.',
+      );
     }
 
     return absolutePath;
@@ -146,7 +159,10 @@ export class ContractsService {
   /**
    * Renderiza programaticamente o documento PDF com layout profissional.
    */
-  private renderContractPdf(filePath: string, production: Production): Promise<void> {
+  private renderContractPdf(
+    filePath: string,
+    production: Production,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         const doc = new PDFDocument({
@@ -165,15 +181,21 @@ export class ContractsService {
         doc
           .fillColor('#0F172A')
           .fontSize(18)
-          .text('CASETRACK — GESTÃO AUDIOVISUAL', { align: 'center', characterSpacing: 1 })
+          .text('CASETRACK — GESTÃO AUDIOVISUAL', {
+            align: 'center',
+            characterSpacing: 1,
+          })
           .moveDown(0.2);
 
         doc
           .fillColor('#3B82F6')
           .fontSize(11)
-          .text('TERMO DE CESSÃO, LOCAÇÃO E RESPONSABILIDADE CIVIL POR EQUIPAMENTOS', {
-            align: 'center',
-          })
+          .text(
+            'TERMO DE CESSÃO, LOCAÇÃO E RESPONSABILIDADE CIVIL POR EQUIPAMENTOS',
+            {
+              align: 'center',
+            },
+          )
           .moveDown(0.5);
 
         doc
@@ -197,11 +219,15 @@ export class ContractsService {
           .text(`Projeto: ${production.title}`)
           .text(`Identificador: ${production.id}`)
           .text(`Status Atual: ${production.status}`)
-          .text(`Data de Início Prevista: ${new Date(production.scheduledAt).toLocaleDateString('pt-BR')}`)
+          .text(
+            `Data de Início Prevista: ${new Date(production.scheduledAt).toLocaleDateString('pt-BR')}`,
+          )
           .text(
             `Data de Término Prevista: ${
               production.scheduledEndAt
-                ? new Date(production.scheduledEndAt).toLocaleDateString('pt-BR')
+                ? new Date(production.scheduledEndAt).toLocaleDateString(
+                    'pt-BR',
+                  )
                 : 'Indeterminado'
             }`,
           );
@@ -219,16 +245,24 @@ export class ContractsService {
           .text('2. ETAPAS OPERACIONAIS E RESPONSÁVEIS', { underline: true })
           .moveDown(0.4);
 
-        const stages = (production.stages || []).sort((a, b) => a.order - b.order);
+        const stages = (production.stages || []).sort(
+          (a, b) => a.order - b.order,
+        );
         if (stages.length > 0) {
           stages.forEach((st) => {
             const resp = st.responsibleUser
               ? `${st.responsibleUser.name} (${st.responsibleUser.email})`
               : 'Não atribuído';
-            doc.fontSize(9).fillColor('#475569').text(`• [${st.type}]: ${st.status} — Responsável: ${resp}`);
+            doc
+              .fontSize(9)
+              .fillColor('#475569')
+              .text(`• [${st.type}]: ${st.status} — Responsável: ${resp}`);
           });
         } else {
-          doc.fontSize(9).fillColor('#94A3B8').text('• Nenhuma etapa operacional cadastrada.');
+          doc
+            .fontSize(9)
+            .fillColor('#94A3B8')
+            .text('• Nenhuma etapa operacional cadastrada.');
         }
 
         doc.moveDown(0.8);
@@ -237,10 +271,14 @@ export class ContractsService {
         doc
           .fillColor('#1E293B')
           .fontSize(12)
-          .text('3. INVENTÁRIO DE EQUIPAMENTOS DISPONIBILIZADOS', { underline: true })
+          .text('3. INVENTÁRIO DE EQUIPAMENTOS DISPONIBILIZADOS', {
+            underline: true,
+          })
           .moveDown(0.4);
 
-        const equipments = (production.productionEquipments || []).filter((pe) => pe.isActive);
+        const equipments = (production.productionEquipments || []).filter(
+          (pe) => pe.isActive,
+        );
         if (equipments.length > 0) {
           // Cabeçalho da Tabela
           const startY = doc.y;
@@ -259,14 +297,19 @@ export class ContractsService {
               .fillColor('#334155')
               .fontSize(9)
               .text(`${eq.name || 'Equipamento'}`, 55, currentY, { width: 220 })
-              .text(`${eq.serialNumber || 'N/A'}`, 280, currentY, { width: 120 })
+              .text(`${eq.serialNumber || 'N/A'}`, 280, currentY, {
+                width: 120,
+              })
               .text(`${pe.movementStatus}`, 410, currentY, { width: 130 });
             currentY += 15;
           });
 
           doc.y = currentY + 5;
         } else {
-          doc.fontSize(9).fillColor('#94A3B8').text('• Nenhum equipamento ativo alocado no momento da emissão.');
+          doc
+            .fontSize(9)
+            .fillColor('#94A3B8')
+            .text('• Nenhum equipamento ativo alocado no momento da emissão.');
         }
 
         doc.moveDown(0.8);
@@ -275,7 +318,9 @@ export class ContractsService {
         doc
           .fillColor('#1E293B')
           .fontSize(12)
-          .text('4. CLÁUSULAS DE RESPONSABILIDADE CIVIL E OPERACIONAL', { underline: true })
+          .text('4. CLÁUSULAS DE RESPONSABILIDADE CIVIL E OPERACIONAL', {
+            underline: true,
+          })
           .moveDown(0.4);
 
         const clauses = [
@@ -286,7 +331,11 @@ export class ContractsService {
         ];
 
         clauses.forEach((c) => {
-          doc.fontSize(8).fillColor('#475569').text(c, { align: 'justify' }).moveDown(0.3);
+          doc
+            .fontSize(8)
+            .fillColor('#475569')
+            .text(c, { align: 'justify' })
+            .moveDown(0.3);
         });
 
         doc.moveDown(1);
@@ -318,8 +367,16 @@ export class ContractsService {
         doc
           .fontSize(8)
           .fillColor('#334155')
-          .text('Produtora Responsável\nCaseTrack Gestão', 60, signY + 5, { width: 200, align: 'center' })
-          .text('Responsável / Operador em Set\nAceite e Ciência dos Termos', 330, signY + 5, { width: 200, align: 'center' });
+          .text('Produtora Responsável\nCaseTrack Gestão', 60, signY + 5, {
+            width: 200,
+            align: 'center',
+          })
+          .text(
+            'Responsável / Operador em Set\nAceite e Ciência dos Termos',
+            330,
+            signY + 5,
+            { width: 200, align: 'center' },
+          );
 
         doc.end();
 

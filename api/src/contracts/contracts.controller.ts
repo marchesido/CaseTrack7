@@ -34,7 +34,8 @@ export class ContractsController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Gerar Termo de Cessão e Responsabilidade em PDF para uma Produção',
+    summary:
+      'Gerar Termo de Cessão e Responsabilidade em PDF para uma Produção',
   })
   @ApiResponse({
     status: 201,
@@ -71,7 +72,8 @@ export class ContractsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Registrar assinatura digital / aceite do Termo de Responsabilidade',
+    summary:
+      'Registrar assinatura digital / aceite do Termo de Responsabilidade',
   })
   @ApiResponse({
     status: 200,

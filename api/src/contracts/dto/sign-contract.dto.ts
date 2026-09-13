@@ -8,7 +8,9 @@ export class SignContractDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'O nome do signatário é obrigatório.' })
-  @MinLength(3, { message: 'O nome do signatário deve ter no mínimo 3 caracteres.' })
+  @MinLength(3, {
+    message: 'O nome do signatário deve ter no mínimo 3 caracteres.',
+  })
   signerName: string;
 
   @ApiProperty({
@@ -17,6 +19,8 @@ export class SignContractDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'O documento do signatário é obrigatório.' })
-  @MinLength(5, { message: 'O documento do signatário deve ter no mínimo 5 caracteres.' })
+  @MinLength(5, {
+    message: 'O documento do signatário deve ter no mínimo 5 caracteres.',
+  })
   signerDocument: string;
 }
