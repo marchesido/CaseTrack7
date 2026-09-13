@@ -13,12 +13,15 @@ import {
 } from 'react-native';
 import Card from '../components/Card';
 import CustomButton from '../components/CustomButton';
+import ImageZoomModal from '../components/ImageZoomModal';
 import equipmentService from '../services/equipmentService';
 import damageService from '../services/damageService';
 import uploadService from '../services/uploadService';
 import showAlert from '../utils/alert';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function EquipmentDetailScreen({ navigation, route }) {
+  const { isAdmin } = useAuth();
   const initialEquipment = route.params?.equipment;
   const equipmentId = initialEquipment?.id || route.params?.equipmentId;
 
@@ -154,7 +157,7 @@ export default function EquipmentDetailScreen({ navigation, route }) {
               <Image
                 source={{ uri: fullEquipmentImageUrl }}
                 style={styles.equipmentImage}
-                resizeMode="cover"
+                resizeMode="contain"
               />
               <View style={styles.zoomOverlayBadge}>
                 <Text style={styles.zoomOverlayText}>🔍 Ver Foto Completa</Text>
@@ -203,12 +206,14 @@ export default function EquipmentDetailScreen({ navigation, route }) {
 
             {/* Ações Rápidas do Equipamento */}
             <View style={styles.quickActionsRow}>
-              <TouchableOpacity
-                style={[styles.actionBtn, styles.editActionBtn]}
-                onPress={() => navigation.navigate('EquipmentForm', { equipment })}
-              >
-                <Text style={styles.editActionText}>✏️ Editar Item</Text>
-              </TouchableOpacity>
+              {isAdmin && (
+                <TouchableOpacity
+                  style={[styles.actionBtn, styles.editActionBtn]}
+                  onPress={() => navigation.navigate('EquipmentForm', { equipment })}
+                >
+                  <Text style={styles.editActionText}>✏️ Editar Item</Text>
+                </TouchableOpacity>
+              )}
 
               <TouchableOpacity
                 style={[styles.actionBtn, styles.damageActionBtn]}
@@ -263,7 +268,7 @@ export default function EquipmentDetailScreen({ navigation, route }) {
           </Card>
         ) : (
           damages.map((damage, index) => {
-            const damageImgUrl = damageService.getFullImageUrl(damage.imagem_url);
+            const damageImgUrls = damageService.getFullImageUrls(damage.imagem_url);
             return (
               <Card key={damage.id || index} style={styles.damageCard}>
                 <View style={styles.damageCardHeader}>
@@ -273,44 +278,46 @@ export default function EquipmentDetailScreen({ navigation, route }) {
                   <Text style={styles.damageDateText}>{formatDate(damage.data_registro)}</Text>
                 </View>
 
-                <View style={styles.damageBodyRow}>
-                  {damageImgUrl ? (
-                    <TouchableOpacity
-                      activeOpacity={0.85}
-                      onPress={() =>
-                        setPreviewImage({
-                          uri: damageImgUrl,
-                          title: `Avaria #${damage.id || index + 1}`,
-                          subtitle: damage.descricao,
-                        })
-                      }
-                      style={styles.damageThumbContainer}
-                    >
-                      <Image
-                        source={{ uri: damageImgUrl }}
-                        style={styles.damageThumbnail}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.zoomIconOverlay}>
-                        <Text style={styles.zoomIconText}>🔍</Text>
-                      </View>
-                    </TouchableOpacity>
-                  ) : (
-                    <View style={styles.damageThumbPlaceholder}>
-                      <Text style={styles.placeholderIcon}>📷</Text>
-                    </View>
-                  )}
-
-                  <View style={styles.damageDetails}>
-                    <Text style={styles.damageDescriptionLabel}>Descrição do Dano:</Text>
-                    <Text style={styles.damageDescriptionText}>{damage.descricao}</Text>
-
-                    {damage.reportadoPor?.nome || damage.reportadoPor?.name ? (
-                      <Text style={styles.reportedByText}>
-                        👤 Relatado por: {damage.reportadoPor?.nome || damage.reportadoPor?.name}
-                      </Text>
-                    ) : null}
+                {damageImgUrls.length > 0 ? (
+                  <View style={styles.damageThumbsRow}>
+                    {damageImgUrls.map((imgUrl, imgIdx) => (
+                      <TouchableOpacity
+                        key={imgIdx}
+                        activeOpacity={0.85}
+                        onPress={() =>
+                          setPreviewImage({
+                            images: damageImgUrls.map((u, i) => ({
+                              uri: u,
+                              title: `Avaria #${damage.id || index + 1} (${i + 1}/${damageImgUrls.length})`,
+                              subtitle: damage.descricao,
+                            })),
+                            initialIndex: imgIdx,
+                          })
+                        }
+                        style={styles.damageThumbContainer}
+                      >
+                        <Image
+                          source={{ uri: imgUrl }}
+                          style={styles.damageThumbnail}
+                          resizeMode="contain"
+                        />
+                        <View style={styles.zoomIconOverlay}>
+                          <Text style={styles.zoomIconText}>🔍</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
                   </View>
+                ) : null}
+
+                <View style={styles.damageDetails}>
+                  <Text style={styles.damageDescriptionLabel}>Descrição do Dano:</Text>
+                  <Text style={styles.damageDescriptionText}>{damage.descricao}</Text>
+
+                  {damage.reportadoPor?.nome || damage.reportadoPor?.name ? (
+                    <Text style={styles.reportedByText}>
+                      👤 Relatado por: {damage.reportadoPor?.nome || damage.reportadoPor?.name}
+                    </Text>
+                  ) : null}
                 </View>
               </Card>
             );
@@ -318,41 +325,26 @@ export default function EquipmentDetailScreen({ navigation, route }) {
         )}
       </ScrollView>
 
-      {/* Modal de Zoom de Imagem */}
-      <Modal
+      {/* Visualizador Avançado de Zoom de Fotos */}
+      <ImageZoomModal
         visible={Boolean(previewImage)}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setPreviewImage(null)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalHeader}>
-            <View style={styles.modalTitleContainer}>
-              <Text style={styles.modalTitle}>{previewImage?.title || 'Visualização'}</Text>
-              {previewImage?.subtitle ? (
-                <Text style={styles.modalSubtitle}>{previewImage.subtitle}</Text>
-              ) : null}
-            </View>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setPreviewImage(null)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.modalCloseText}>✕ Fechar</Text>
-            </TouchableOpacity>
-          </View>
-
-          {previewImage?.uri ? (
-            <View style={styles.modalImageWrapper}>
-              <Image
-                source={{ uri: previewImage.uri }}
-                style={styles.modalFullImage}
-                resizeMode="contain"
-              />
-            </View>
-          ) : null}
-        </View>
-      </Modal>
+        images={
+          previewImage?.images ||
+          (previewImage?.uri
+            ? [
+                {
+                  uri: previewImage.uri,
+                  title: previewImage.title,
+                  subtitle: previewImage.subtitle,
+                },
+              ]
+            : [])
+        }
+        initialIndex={previewImage?.initialIndex || 0}
+        title={previewImage?.title}
+        subtitle={previewImage?.subtitle}
+        onClose={() => setPreviewImage(null)}
+      />
     </View>
   );
 }
@@ -412,7 +404,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 230,
     position: 'relative',
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#0F172A',
   },
   equipmentImage: {
     width: '100%',
@@ -669,17 +661,25 @@ const styles = StyleSheet.create({
     color: '#64748B',
     fontWeight: '500',
   },
-  damageBodyRow: {
+  damageThumbsRow: {
     flexDirection: 'row',
-    gap: 12,
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 10,
+  },
+  damageBodyRow: {
+    flexDirection: 'column',
+    gap: 8,
   },
   damageThumbContainer: {
-    width: 85,
-    height: 85,
+    width: 76,
+    height: 76,
     borderRadius: 8,
     overflow: 'hidden',
     position: 'relative',
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#0F172A',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
   },
   damageThumbnail: {
     width: '100%',
