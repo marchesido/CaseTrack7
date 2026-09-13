@@ -196,3 +196,31 @@ export const getStatusLabel = (key) => {
     key
   );
 };
+
+/**
+ * Retorna as cores semânticas ativas para o modo claro ou escuro
+ */
+export const getThemeColors = (isDark = true) => {
+  const modeColors = isDark ? COLORS.dark : COLORS.light;
+  return {
+    ...modeColors,
+    brand: COLORS.brand,
+    equipmentStatus: COLORS.equipmentStatus,
+    productionStatus: COLORS.productionStatus,
+    stages: COLORS.stages,
+    stageStatus: COLORS.stageStatus,
+    movementStatus: COLORS.movementStatus,
+  };
+};
+
+/**
+ * Retorna o tema completo consolidado
+ */
+export const getTheme = (isDark = true) => ({
+  isDark,
+  colors: getThemeColors(isDark),
+  spacing: SPACING,
+  radius: RADIUS,
+  typography: TYPOGRAPHY,
+});
+
