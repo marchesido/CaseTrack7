@@ -10,10 +10,14 @@ export class DamagesService {
     private readonly damageRepository: Repository<Damage>,
   ) {}
 
-  async create(data: Partial<Damage>, imageUrl?: string): Promise<Damage> {
+  async create(data: Partial<Damage>, imageUrl?: string | string[]): Promise<Damage> {
+    const formattedImageUrl = Array.isArray(imageUrl)
+      ? imageUrl.filter(Boolean).join(',')
+      : imageUrl;
+
     const damage = this.damageRepository.create({
       ...data,
-      imagem_url: imageUrl,
+      imagem_url: formattedImageUrl,
     });
     return this.damageRepository.save(damage);
   }

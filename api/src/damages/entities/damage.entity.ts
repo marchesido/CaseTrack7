@@ -24,7 +24,7 @@ export class Damage {
   @Column({ type: 'text' })
   descricao: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'text', nullable: true })
   imagem_url: string;
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
