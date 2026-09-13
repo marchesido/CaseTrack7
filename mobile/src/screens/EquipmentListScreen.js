@@ -14,9 +14,11 @@ import {
 } from 'react-native';
 import Card from '../components/Card';
 import CustomButton from '../components/CustomButton';
+import ImageZoomModal from '../components/ImageZoomModal';
 import equipmentService from '../services/equipmentService';
 import uploadService from '../services/uploadService';
 import showAlert from '../utils/alert';
+import { useAuth } from '../contexts/AuthContext';
 
 const STATUS_TABS = [
   { key: 'ALL', label: 'Todos', activeColor: '#1E3A8A', bgColor: '#EFF6FF', textColor: '#1E3A8A' },
@@ -26,6 +28,7 @@ const STATUS_TABS = [
 ];
 
 export default function EquipmentListScreen({ navigation, route }) {
+  const { isAdmin } = useAuth();
   const [equipments, setEquipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -164,7 +167,7 @@ export default function EquipmentListScreen({ navigation, route }) {
               <Image
                 source={{ uri: fullImageUrl }}
                 style={styles.thumbnail}
-                resizeMode="cover"
+                resizeMode="contain"
               />
               <View style={styles.zoomIconBadge}>
                 <Text style={styles.zoomIconText}>🔍</Text>
@@ -219,19 +222,23 @@ export default function EquipmentListScreen({ navigation, route }) {
             <Text style={styles.damageBtnText}>⚠️ Avaria</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.actionBtn, styles.editBtn]}
-            onPress={() => navigation.navigate('EquipmentForm', { equipment: item })}
-          >
-            <Text style={styles.editBtnText}>Editar</Text>
-          </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.editBtn]}
+              onPress={() => navigation.navigate('EquipmentForm', { equipment: item })}
+            >
+              <Text style={styles.editBtnText}>Editar</Text>
+            </TouchableOpacity>
+          )}
 
-          <TouchableOpacity
-            style={[styles.actionBtn, styles.deleteBtn]}
-            onPress={() => handleDelete(item)}
-          >
-            <Text style={styles.deleteBtnText}>Excluir</Text>
-          </TouchableOpacity>
+          {isAdmin && (
+            <TouchableOpacity
+              style={[styles.actionBtn, styles.deleteBtn]}
+              onPress={() => handleDelete(item)}
+            >
+              <Text style={styles.deleteBtnText}>Excluir</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </Card>
     );
@@ -244,12 +251,14 @@ export default function EquipmentListScreen({ navigation, route }) {
         <Text style={styles.totalCount}>
           Total: {equipments.length} item(ns)
         </Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('EquipmentForm')}
-        >
-          <Text style={styles.addButtonText}>+ Novo Item</Text>
-        </TouchableOpacity>
+        {isAdmin && (
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('EquipmentForm')}
+          >
+            <Text style={styles.addButtonText}>+ Novo Item</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Barra de Pesquisa */}
@@ -391,49 +400,26 @@ export default function EquipmentListScreen({ navigation, route }) {
         />
       )}
 
-      {/* Modal de Zoom da Imagem */}
-      <Modal
+      {/* Visualizador Avançado de Zoom de Fotos */}
+      <ImageZoomModal
         visible={Boolean(previewImage)}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setPreviewImage(null)}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <View style={styles.modalTitleArea}>
-                <Text style={styles.modalTitle} numberOfLines={1}>
-                  {previewImage?.name}
-                </Text>
-                {previewImage?.serialNumber ? (
-                  <Text style={styles.modalSerial}>S/N: {previewImage.serialNumber}</Text>
-                ) : null}
-              </View>
-              <TouchableOpacity
-                onPress={() => setPreviewImage(null)}
-                style={styles.modalCloseBtn}
-              >
-                <Text style={styles.modalCloseText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            {previewImage?.uri && (
-              <Image
-                source={{ uri: previewImage.uri }}
-                style={styles.modalImage}
-                resizeMode="contain"
-              />
-            )}
-
-            <TouchableOpacity
-              style={styles.modalDoneBtn}
-              onPress={() => setPreviewImage(null)}
-            >
-              <Text style={styles.modalDoneBtnText}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        images={
+          previewImage
+            ? [
+                {
+                  uri: previewImage.uri,
+                  title: previewImage.name,
+                  subtitle: previewImage.serialNumber
+                    ? `S/N: ${previewImage.serialNumber}`
+                    : null,
+                },
+              ]
+            : []
+        }
+        title={previewImage?.name}
+        subtitle={previewImage?.serialNumber ? `S/N: ${previewImage.serialNumber}` : null}
+        onClose={() => setPreviewImage(null)}
+      />
     </View>
   );
 }

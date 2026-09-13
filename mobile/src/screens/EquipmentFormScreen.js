@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import CustomButton from '../components/CustomButton';
 import equipmentService from '../services/equipmentService';
 import uploadService from '../services/uploadService';
 import showAlert from '../utils/alert';
+import { useAuth } from '../contexts/AuthContext';
 
 const STATUS_OPTIONS = [
   { value: 'DISPONIVEL', label: 'Disponível', activeColor: '#10B981', bgColor: '#ECFDF5' },
@@ -25,6 +26,21 @@ const STATUS_OPTIONS = [
 ];
 
 export default function EquipmentFormScreen({ navigation, route }) {
+  const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    if (!isAdmin) {
+      showAlert(
+        'Acesso Negado',
+        'Apenas administradores possuem permissão para cadastrar ou editar equipamentos.',
+      );
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    }
+  }, [isAdmin, navigation]);
+
   const existingEquipment = route.params?.equipment;
   const isEditing = Boolean(existingEquipment);
 
@@ -68,11 +84,11 @@ export default function EquipmentFormScreen({ navigation, route }) {
         return;
       }
 
+      // Permite fotos na proporção original sem corte forçado
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
+        allowsEditing: false,
+        quality: 0.85,
       });
 
       if (!result.canceled && result.assets?.[0]?.uri) {
@@ -104,10 +120,10 @@ export default function EquipmentFormScreen({ navigation, route }) {
         return;
       }
 
+      // Permite fotos na proporção original sem corte forçado
       const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
+        allowsEditing: false,
+        quality: 0.85,
       });
 
       if (!result.canceled && result.assets?.[0]?.uri) {
@@ -212,7 +228,7 @@ export default function EquipmentFormScreen({ navigation, route }) {
           <View style={styles.imageSection}>
             {imageUri ? (
               <View style={styles.previewContainer}>
-                <Image source={{ uri: imageUri }} style={styles.imagePreview} resizeMode="cover" />
+                <Image source={{ uri: imageUri }} style={styles.imagePreview} resizeMode="contain" />
                 {uploadingImage && (
                   <View style={styles.uploadOverlay}>
                     <ActivityIndicator size="small" color="#FFFFFF" />

@@ -18,8 +18,24 @@ import productionService from '../services/productionService';
 import equipmentService from '../services/equipmentService';
 import showAlert from '../utils/alert';
 import { COLORS, RADIUS, SPACING } from '../utils/theme';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProductionFormScreen({ navigation }) {
+  const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    if (!isAdmin) {
+      showAlert(
+        'Acesso Negado',
+        'Apenas administradores possuem permissão para criar novas produções.',
+      );
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Home' }],
+      });
+    }
+  }, [isAdmin, navigation]);
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isAllDay, setIsAllDay] = useState(false);
