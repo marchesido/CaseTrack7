@@ -1,11 +1,12 @@
 import axios from 'axios';
 import { Platform, NativeModules } from 'react-native';
+import Constants from 'expo-constants';
 
 /**
  * Resolução dinâmica da URL base dependendo da plataforma e ambiente:
- * - Em dispositivo físico (Expo Go via Wi-Fi): extrai o IP da máquina host diretamente do scriptURL
- * - Android Emulator: 10.0.2.2 mapeia para o localhost da máquina host
- * - iOS Simulator / Web: localhost funciona diretamente
+ * - Em dispositivo físico (Expo Go via Wi-Fi): extrai o IP da máquina host via Constants.hostUri
+ * - Fallback: scriptURL ou IP local atual da máquina (192.168.0.120)
+ * - Web: localhost ou hostname atual
  */
 const getDefaultBaseURL = () => {
   if (process.env.EXPO_PUBLIC_API_URL) {
@@ -20,7 +21,20 @@ const getDefaultBaseURL = () => {
     return `http://${host}:3000/api/v1`;
   }
 
-  // No Expo Go / React Native dev mode, scriptURL traz o IP do Metro Bundler (ex: http://192.168.0.114:8081/...)
+  // 1. No Expo Go moderno, extrai dinamicamente o IP do Metro Bundler via Constants
+  const hostUri =
+    Constants.expoConfig?.hostUri ||
+    Constants.manifest2?.extra?.expoClient?.hostUri ||
+    Constants.manifest?.debuggerHost;
+
+  if (hostUri) {
+    const extractedHost = hostUri.split(':')[0];
+    if (extractedHost && extractedHost !== 'localhost') {
+      return `http://${extractedHost}:3000/api/v1`;
+    }
+  }
+
+  // 2. Extração via NativeModules.SourceCode.scriptURL
   const scriptURL = NativeModules?.SourceCode?.scriptURL;
   if (scriptURL) {
     const match = scriptURL.match(/https?:\/\/([^:/]+)/);
@@ -29,9 +43,9 @@ const getDefaultBaseURL = () => {
     }
   }
 
-  // Fallback padrão para a máquina de desenvolvimento
+  // 3. Fallback padrão para a máquina de desenvolvimento na rede local
   return Platform.OS === 'android'
-    ? 'http://192.168.0.114:3000/api/v1'
+    ? 'http://192.168.0.120:3000/api/v1'
     : 'http://localhost:3000/api/v1';
 };
 
@@ -39,6 +53,7 @@ export const BASE_URL = getDefaultBaseURL();
 
 // Armazenamento em memória do token JWT
 let currentAuthToken = null;
+let unauthorizedHandler = null;
 
 export const setAuthToken = (token) => {
   currentAuthToken = token;
@@ -52,6 +67,15 @@ export const clearAuthToken = () => {
   currentAuthToken = null;
 };
 
+export const registerUnauthorizedHandler = (handler) => {
+  unauthorizedHandler = handler;
+  return () => {
+    if (unauthorizedHandler === handler) {
+      unauthorizedHandler = null;
+    }
+  };
+};
+
 // Instância centralizada do Axios
 const api = axios.create({
   baseURL: BASE_URL,
@@ -62,24 +86,9 @@ const api = axios.create({
   },
 });
 
-// Interceptor de Requisição: Injeta automaticamente o Bearer Token quando disponível
-// Em ambiente de teste/dev, se não houver token, autentica com a conta Admin automaticamente
+// Interceptor de Requisição: Injeta o Bearer Token JWT quando autenticado
 api.interceptors.request.use(
-  async (config) => {
-    if (!currentAuthToken && !config.url?.includes('/auth/login')) {
-      try {
-        const loginRes = await axios.post(`${BASE_URL}/auth/login`, {
-          email: 'admin@example.com',
-          password: 'admin123',
-        });
-        if (loginRes.data?.access_token) {
-          currentAuthToken = loginRes.data.access_token;
-        }
-      } catch (err) {
-        // Silencioso se backend estiver indisponível; erro de rede será capturado no response interceptor
-      }
-    }
-
+  (config) => {
     if (currentAuthToken) {
       config.headers.Authorization = `Bearer ${currentAuthToken}`;
     }
@@ -116,6 +125,13 @@ api.interceptors.response.use(
     if (status === 401) {
       console.warn('[API Auth Error]: Sessão expirada ou não autorizada (401).');
       clearAuthToken();
+      if (typeof unauthorizedHandler === 'function') {
+        try {
+          unauthorizedHandler();
+        } catch (cbErr) {
+          console.warn('[API Auth Error]: Erro no tratador de desautorização:', cbErr);
+        }
+      }
     }
 
     if (status === 424) {
