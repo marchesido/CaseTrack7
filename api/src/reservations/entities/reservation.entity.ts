@@ -33,6 +33,10 @@ export class Reservation {
   @Column({ type: 'date' })
   data_fim: Date;
 
-  @Column({ type: 'enum', enum: ReservationStatus, default: ReservationStatus.PENDENTE })
+  @Column({
+    type: 'enum',
+    enum: ReservationStatus,
+    default: ReservationStatus.PENDENTE,
+  })
   status: ReservationStatus;
 }

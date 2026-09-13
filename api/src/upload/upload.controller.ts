@@ -22,7 +22,12 @@ export class UploadController {
         if (file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('Apenas arquivos de imagem são permitidos (jpg, jpeg, png, webp)'), false);
+          cb(
+            new BadRequestException(
+              'Apenas arquivos de imagem são permitidos (jpg, jpeg, png, webp)',
+            ),
+            false,
+          );
         }
       },
       storage: diskStorage({
@@ -36,7 +41,9 @@ export class UploadController {
   )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('Nenhum arquivo enviado ou arquivo inválido.');
+      throw new BadRequestException(
+        'Nenhum arquivo enviado ou arquivo inválido.',
+      );
     }
     return {
       message: 'Upload realizado com sucesso',

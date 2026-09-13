@@ -1,7 +1,10 @@
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../../users/entities/user.entity';
-import { Equipment, EquipmentStatus } from '../../equipments/entities/equipment.entity';
+import {
+  Equipment,
+  EquipmentStatus,
+} from '../../equipments/entities/equipment.entity';
 import { config } from 'dotenv';
 import * as path from 'path';
 
@@ -77,13 +80,15 @@ async function runSeed() {
       {
         name: 'Lente Sony FE 24-70mm f/2.8 GM II',
         serialNumber: 'SEL2470GM2-1102',
-        description: 'Lente zoom padrão premium G Master com filtro ND variável',
+        description:
+          'Lente zoom padrão premium G Master com filtro ND variável',
         status: EquipmentStatus.EM_USO,
       },
       {
         name: 'Kit Microfone Rode Wireless PRO',
         serialNumber: 'RODE-WPRO-4421',
-        description: 'Sistema de lapela duplo sem fio com gravação onboard 32-bit float',
+        description:
+          'Sistema de lapela duplo sem fio com gravação onboard 32-bit float',
         status: EquipmentStatus.MANUTENCAO,
       },
     ];

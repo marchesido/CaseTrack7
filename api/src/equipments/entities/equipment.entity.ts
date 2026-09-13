@@ -27,7 +27,11 @@ export class Equipment {
   @Column({ length: 100, nullable: true })
   serialNumber: string;
 
-  @Column({ type: 'enum', enum: EquipmentStatus, default: EquipmentStatus.DISPONIVEL })
+  @Column({
+    type: 'enum',
+    enum: EquipmentStatus,
+    default: EquipmentStatus.DISPONIVEL,
+  })
   status: EquipmentStatus;
 
   @Column({ length: 255, nullable: true })
