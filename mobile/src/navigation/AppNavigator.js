@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import ThemeToggle from '../components/ThemeToggle';
 
 import LoginScreen from '../screens/LoginScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -18,26 +21,47 @@ const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
   const { user, loading } = useAuth();
+  const { colors, isDark } = useTheme();
+
+  const navTheme = useMemo(() => {
+    const baseTheme = isDark ? DarkTheme : DefaultTheme;
+    return {
+      ...baseTheme,
+      colors: {
+        ...baseTheme.colors,
+        primary: colors.brand.primary,
+        background: colors.background,
+        card: isDark ? colors.surface : '#1E3A8A',
+        text: '#FFFFFF',
+        border: colors.border,
+      },
+    };
+  }, [isDark, colors]);
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3B82F6" />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <ActivityIndicator size="large" color={colors.brand.primary} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={navTheme}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#1E3A8A',
+            backgroundColor: isDark ? colors.surface : '#1E3A8A',
           },
-          headerTintColor: '#fff',
+          headerTintColor: '#FFFFFF',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
+          headerRight: () => (
+            <ThemeToggle variant="compact" inHeader style={{ marginRight: 4 }} />
+          ),
         }}
       >
         {!user ? (
@@ -110,7 +134,6 @@ export default function AppNavigator() {
 const styles = StyleSheet.create({
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#0F172A',
     justifyContent: 'center',
     alignItems: 'center',
   },
