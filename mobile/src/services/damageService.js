@@ -1,7 +1,7 @@
 import api, { BASE_URL } from './api';
 import { Platform } from 'react-native';
 
-const MAX_DAMAGE_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB limite da rubrica Tech Forge
+const MAX_DAMAGE_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB limite por imagem
 
 /**
  * Serviço de Avarias - CaseTrack

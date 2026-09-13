@@ -45,7 +45,7 @@ export class DamagesController {
         },
       }),
       limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB limite por foto (Rubrica Tech Forge)
+        fileSize: 5 * 1024 * 1024, // 5MB limite por foto
         files: 4, // Máximo 4 imagens por laudo
       },
       fileFilter: (req, file, cb) => {

@@ -108,9 +108,9 @@ export default function LoginScreen() {
           />
         </Card>
 
-        {/* Bloco de Demonstração para Avaliação Acadêmica */}
+        {/* Bloco de Demonstração Rápida */}
         <Card style={styles.demoCard}>
-          <Text style={styles.demoHeading}>ℹ️ Contas de Teste (Rubrica 7º Bimestre)</Text>
+          <Text style={styles.demoHeading}>ℹ️ Contas de Demonstração</Text>
           <Text style={styles.demoSubtext}>
             Toque em um dos perfis abaixo para preencher automaticamente:
           </Text>

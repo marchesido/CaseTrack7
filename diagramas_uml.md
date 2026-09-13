@@ -1,6 +1,6 @@
-# Diagramas UML - Fase 1 (CaseTrack)
+# Diagramas UML - CaseTrack
 
-Abaixo estão os diagramas desenvolvidos para a Fase 1 do projeto, abrangendo Casos de Uso, Atividades, Sequência e o Modelo de Dados (DER).
+Abaixo estão os diagramas de arquitetura do sistema CaseTrack, abrangendo Casos de Uso, Atividades, Sequência e o Modelo de Dados (DER).
 
 ## 1. Diagramas de Casos de Uso
 
@@ -44,7 +44,7 @@ usecaseDiagram
     Admin --> UC7
 ```
 
-### 1.3 Ciclo de Produções Audiovisuais e Movimentações em Campo (Sprint 6)
+### 1.3 Ciclo de Produções Audiovisuais e Movimentações em Campo
 ```mermaid
 usecaseDiagram
     actor Produtor as "Produtor / Gestor de Set"
@@ -55,7 +55,7 @@ usecaseDiagram
         usecase UC10 as "Alocar Equipamentos ao Projeto"
         usecase UC11 as "Realizar Check-out de Equipamento"
         usecase UC12 as "Realizar Check-in com Inspeção e Avaria"
-        usecase UC13 as "Substituir Equipamento em Campo (B13)"
+        usecase UC13 as "Substituir Equipamento em Campo"
         usecase UC14 as "Concluir Etapa com Validação de Devolução"
     }
     
@@ -117,7 +117,7 @@ activityDiagram
     stop
 ```
 
-### 2.3 Fluxo de Conclusão da Captação e Auto-conclusão da Produção (Sprint 6)
+### 2.3 Fluxo de Conclusão da Captação e Auto-conclusão da Produção
 ```mermaid
 activityDiagram
     start
@@ -191,7 +191,7 @@ sequenceDiagram
     API-->>Admin: 200 OK
 ```
 
-### 3.3 Fluxo de Substituição Atômica de Equipamento em Campo (B13 - Sprint 6)
+### 3.3 Fluxo de Substituição Atômica de Equipamento em Campo
 ```mermaid
 sequenceDiagram
     participant App as App Mobile (Produtor)
@@ -210,7 +210,7 @@ sequenceDiagram
     API-->>App: 200 OK (Item substituído com histórico preservado)
 ```
 
-### 3.4 Fluxo de Sincronização com Google Calendar (Sprint 7)
+### 3.4 Fluxo de Sincronização com Google Calendar
 ```mermaid
 sequenceDiagram
     participant App as App Mobile
@@ -241,7 +241,7 @@ sequenceDiagram
     API-->>App: 200 OK (Sincronizado com Sucesso)
 ```
 
-### 3.5 Fluxo de Emissão de Termo em PDF e Assinatura Digital (Sprint 8)
+### 3.5 Fluxo de Emissão de Termo em PDF e Assinatura Digital
 ```mermaid
 sequenceDiagram
     participant App as App Mobile (Produtor/Gestor)

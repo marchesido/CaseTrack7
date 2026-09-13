@@ -75,7 +75,7 @@ createdAt
 
 -------------------------------------------------------------------------------------
 
-Equipments (CRUD 4)
+Equipments (Equipamentos)
 Campos ideais:
 
 id
