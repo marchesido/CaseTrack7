@@ -48,7 +48,8 @@ export class GoogleCalendarService {
   getOAuth2Client(): any {
     if (!this.oauth2ClientInstance) {
       const clientId = process.env.GOOGLE_CLIENT_ID || 'mock-google-client-id';
-      const clientSecret = process.env.GOOGLE_CLIENT_SECRET || 'mock-google-client-secret';
+      const clientSecret =
+        process.env.GOOGLE_CLIENT_SECRET || 'mock-google-client-secret';
       const redirectUri =
         process.env.GOOGLE_REDIRECT_URI ||
         'http://localhost:3000/api/productions/google/callback';
@@ -100,7 +101,9 @@ export class GoogleCalendarService {
       const tokenResponse = await oauth2Client.getToken(code);
       tokens = tokenResponse.tokens;
     } catch (error) {
-      this.logger.error(`Erro ao trocar código por tokens do Google: ${error.message}`);
+      this.logger.error(
+        `Erro ao trocar código por tokens do Google: ${error.message}`,
+      );
       throw new HttpException(
         'Falha ao autenticar com o Google. Código de autorização inválido ou expirado.',
         HttpStatus.BAD_REQUEST,
@@ -133,13 +136,18 @@ export class GoogleCalendarService {
       tokenEntity.refreshTokenEncrypted = encryptToken(tokens.refresh_token);
     } else if (!tokenEntity.refreshTokenEncrypted) {
       // Se não veio refresh token e não tínhamos antes, gera fallback
-      tokenEntity.refreshTokenEncrypted = encryptToken('offline_session_fallback');
+      tokenEntity.refreshTokenEncrypted = encryptToken(
+        'offline_session_fallback',
+      );
     }
 
-    const expiresInMs = (tokens.expiry_date ? tokens.expiry_date - Date.now() : 3600 * 1000);
+    const expiresInMs = tokens.expiry_date
+      ? tokens.expiry_date - Date.now()
+      : 3600 * 1000;
     tokenEntity.expiresAt = new Date(Date.now() + Math.max(expiresInMs, 60000));
     tokenEntity.calendarId = tokenEntity.calendarId || 'primary';
-    tokenEntity.calendarName = tokenEntity.calendarName || 'CaseTrack Produções (Google Calendar)';
+    tokenEntity.calendarName =
+      tokenEntity.calendarName || 'CaseTrack Produções (Google Calendar)';
 
     const saved = await this.googleTokenRepo.save(tokenEntity);
 
@@ -167,7 +175,9 @@ export class GoogleCalendarService {
       };
     }
 
-    const isExpired = token.expiresAt ? token.expiresAt.getTime() <= Date.now() : true;
+    const isExpired = token.expiresAt
+      ? token.expiresAt.getTime() <= Date.now()
+      : true;
 
     return {
       isConnected: true,
@@ -230,7 +240,9 @@ export class GoogleCalendarService {
       rawRefreshToken = decryptToken(token.refreshTokenEncrypted);
     } catch (e) {
       this.logger.error(`Falha ao descriptografar refresh token: ${e.message}`);
-      this.triggerReconnectRequired('Falha de descriptografia no token de segurança.');
+      this.triggerReconnectRequired(
+        'Falha de descriptografia no token de segurança.',
+      );
     }
 
     const oauth2Client = this.getOAuth2Client();
@@ -241,7 +253,9 @@ export class GoogleCalendarService {
       const credentials = response.credentials;
 
       if (!credentials || !credentials.access_token) {
-        this.triggerReconnectRequired('Resposta de renovação não continha access_token.');
+        this.triggerReconnectRequired(
+          'Resposta de renovação não continha access_token.',
+        );
       }
 
       token.accessToken = credentials.access_token;
@@ -259,7 +273,9 @@ export class GoogleCalendarService {
       return token.accessToken;
     } catch (err) {
       this.logger.warn(`Erro ao renovar token com o Google: ${err.message}`);
-      this.triggerReconnectRequired(err.message || 'Token revogado ou expirado no provedor Google.');
+      this.triggerReconnectRequired(
+        err.message || 'Token revogado ou expirado no provedor Google.',
+      );
     }
   }
 
@@ -279,7 +295,9 @@ export class GoogleCalendarService {
     });
 
     if (!production) {
-      throw new NotFoundException(`Produção com ID ${productionId} não encontrada.`);
+      throw new NotFoundException(
+        `Produção com ID ${productionId} não encontrada.`,
+      );
     }
 
     const accessToken = await this.getValidAccessToken();
@@ -300,20 +318,31 @@ export class GoogleCalendarService {
     ];
 
     if (production.stages && production.stages.length > 0) {
-      const sortedStages = [...production.stages].sort((a, b) => a.order - b.order);
+      const sortedStages = [...production.stages].sort(
+        (a, b) => a.order - b.order,
+      );
       for (const st of sortedStages) {
-        const resp = st.responsibleUser ? `${st.responsibleUser.name} (${st.responsibleUser.email})` : 'A definir';
-        descriptionLines.push(`• [${st.type}] - Status: ${st.status} | Responsável: ${resp}`);
+        const resp = st.responsibleUser
+          ? `${st.responsibleUser.name} (${st.responsibleUser.email})`
+          : 'A definir';
+        descriptionLines.push(
+          `• [${st.type}] - Status: ${st.status} | Responsável: ${resp}`,
+        );
       }
     } else {
       descriptionLines.push('• Nenhuma etapa cadastrada');
     }
 
     descriptionLines.push('', '📦 EQUIPAMENTOS ALOCADOS:');
-    if (production.productionEquipments && production.productionEquipments.length > 0) {
+    if (
+      production.productionEquipments &&
+      production.productionEquipments.length > 0
+    ) {
       for (const pe of production.productionEquipments) {
         if (pe.isActive && pe.equipment) {
-          descriptionLines.push(`• ${pe.equipment.name} (${pe.equipment.serialNumber || 'S/N N/A'}) - [${pe.movementStatus}]`);
+          descriptionLines.push(
+            `• ${pe.equipment.name} (${pe.equipment.serialNumber || 'S/N N/A'}) - [${pe.movementStatus}]`,
+          );
         }
       }
     } else {
@@ -321,14 +350,18 @@ export class GoogleCalendarService {
     }
 
     descriptionLines.push('', '— Sincronizado automaticamente via CaseTrack');
-    const description = descriptionLines.filter((l) => l !== undefined).join('\n');
+    const description = descriptionLines
+      .filter((l) => l !== undefined)
+      .join('\n');
 
     // Montagem das datas de início e término
     const startObj: any = {};
     const endObj: any = {};
 
     if (production.isAllDay) {
-      const startDateStr = new Date(production.scheduledAt).toISOString().split('T')[0];
+      const startDateStr = new Date(production.scheduledAt)
+        .toISOString()
+        .split('T')[0];
       const endDateStr = production.scheduledEndAt
         ? new Date(production.scheduledEndAt).toISOString().split('T')[0]
         : startDateStr;
@@ -340,7 +373,9 @@ export class GoogleCalendarService {
 
       const endDate = production.scheduledEndAt
         ? new Date(production.scheduledEndAt)
-        : new Date(new Date(production.scheduledAt).getTime() + 4 * 3600 * 1000); // 4h default diária
+        : new Date(
+            new Date(production.scheduledAt).getTime() + 4 * 3600 * 1000,
+          ); // 4h default diária
       endObj.dateTime = endDate.toISOString();
       endObj.timeZone = production.timezone;
     }
@@ -385,7 +420,9 @@ export class GoogleCalendarService {
         resultEvent = insertRes.data;
       }
     } catch (apiErr: any) {
-      this.logger.error(`Falha ao sincronizar com Google Calendar API: ${apiErr.message}`);
+      this.logger.error(
+        `Falha ao sincronizar com Google Calendar API: ${apiErr.message}`,
+      );
       if (apiErr?.status === 401 || apiErr?.status === 403) {
         this.triggerReconnectRequired(apiErr.message);
       }
@@ -425,7 +462,8 @@ export class GoogleCalendarService {
       {
         status: 424,
         error: 'GOOGLE_RECONNECT_REQUIRED',
-        message: 'Reconexão com o Google necessária. Por favor, reconecte sua conta Google no app.',
+        message:
+          'Reconexão com o Google necessária. Por favor, reconecte sua conta Google no app.',
         reason,
       },
       HttpStatus.FAILED_DEPENDENCY, // HTTP 424

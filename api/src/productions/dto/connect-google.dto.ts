@@ -3,7 +3,8 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ConnectGoogleDto {
   @ApiProperty({
-    description: 'Código de autorização OAuth2 retornado pelo Google após o consentimento do usuário.',
+    description:
+      'Código de autorização OAuth2 retornado pelo Google após o consentimento do usuário.',
     example: '4/0AVHEtk45x...',
   })
   @IsString()

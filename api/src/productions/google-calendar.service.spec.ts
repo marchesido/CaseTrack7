@@ -3,7 +3,11 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { GoogleCalendarService } from './google-calendar.service';
 import { GoogleToken } from './entities/google-token.entity';
-import { Production, ProductionStatus, GoogleSourceStatus } from './entities/production.entity';
+import {
+  Production,
+  ProductionStatus,
+  GoogleSourceStatus,
+} from './entities/production.entity';
 import { encryptToken } from './utils/crypto.util';
 
 // Mock googleapis
@@ -18,7 +22,11 @@ jest.mock('googleapis', () => {
     google: {
       auth: {
         OAuth2: jest.fn().mockImplementation(() => ({
-          generateAuthUrl: jest.fn().mockReturnValue('https://accounts.google.com/o/oauth2/auth?mock=true'),
+          generateAuthUrl: jest
+            .fn()
+            .mockReturnValue(
+              'https://accounts.google.com/o/oauth2/auth?mock=true',
+            ),
           getToken: jest.fn(),
           setCredentials: jest.fn(),
           refreshAccessToken: jest.fn(),
@@ -39,7 +47,11 @@ describe('GoogleCalendarService', () => {
     mockGoogleTokenRepo = {
       findOne: jest.fn(),
       create: jest.fn().mockImplementation((dto) => ({ ...dto })),
-      save: jest.fn().mockImplementation((entity) => Promise.resolve({ id: 'token-uuid', ...entity })),
+      save: jest
+        .fn()
+        .mockImplementation((entity) =>
+          Promise.resolve({ id: 'token-uuid', ...entity }),
+        ),
       update: jest.fn().mockResolvedValue({ affected: 1 }),
       remove: jest.fn().mockResolvedValue(true),
     };
@@ -66,7 +78,11 @@ describe('GoogleCalendarService', () => {
     service = module.get<GoogleCalendarService>(GoogleCalendarService);
 
     mockOAuth2Client = {
-      generateAuthUrl: jest.fn().mockReturnValue('https://accounts.google.com/o/oauth2/auth?scope=calendar'),
+      generateAuthUrl: jest
+        .fn()
+        .mockReturnValue(
+          'https://accounts.google.com/o/oauth2/auth?scope=calendar',
+        ),
       getToken: jest.fn(),
       setCredentials: jest.fn(),
       refreshAccessToken: jest.fn(),
@@ -83,7 +99,9 @@ describe('GoogleCalendarService', () => {
         expect.objectContaining({
           access_type: 'offline',
           prompt: 'consent',
-          scope: expect.arrayContaining(['https://www.googleapis.com/auth/calendar']),
+          scope: expect.arrayContaining([
+            'https://www.googleapis.com/auth/calendar',
+          ]),
         }),
       );
     });
@@ -115,7 +133,9 @@ describe('GoogleCalendarService', () => {
     it('deve lançar BAD_REQUEST se a troca de código falhar no Google', async () => {
       mockOAuth2Client.getToken.mockRejectedValue(new Error('invalid_grant'));
 
-      await expect(service.handleCallback('invalid-code')).rejects.toThrow(HttpException);
+      await expect(service.handleCallback('invalid-code')).rejects.toThrow(
+        HttpException,
+      );
     });
   });
 
@@ -196,7 +216,9 @@ describe('GoogleCalendarService', () => {
         expiresAt: new Date(Date.now() - 1000),
       });
 
-      mockOAuth2Client.refreshAccessToken.mockRejectedValue(new Error('invalid_grant: Token has been expired or revoked.'));
+      mockOAuth2Client.refreshAccessToken.mockRejectedValue(
+        new Error('invalid_grant: Token has been expired or revoked.'),
+      );
 
       await expect(service.getValidAccessToken()).rejects.toMatchObject({
         status: HttpStatus.FAILED_DEPENDENCY,
@@ -211,7 +233,9 @@ describe('GoogleCalendarService', () => {
     it('deve lançar NotFoundException se a produção não existir', async () => {
       mockProductionRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.syncProduction('invalid-id')).rejects.toThrow(NotFoundException);
+      await expect(service.syncProduction('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('deve criar novo evento no Google Calendar e salvar o googleEventId na produção', async () => {
