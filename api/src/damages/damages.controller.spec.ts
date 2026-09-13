@@ -36,13 +36,15 @@ describe('DamagesController', () => {
 
   describe('create', () => {
     it('deve rejeitar quando nenhum arquivo for enviado', async () => {
-      await expect(controller.create({ descricao: 'Lente riscada' }, [])).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        controller.create({ descricao: 'Lente riscada' }, []),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('deve rejeitar quando mais de 4 arquivos forem enviados', async () => {
-      const unlinkSpy = jest.spyOn(fs.promises, 'unlink').mockResolvedValue(undefined);
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
       const fakeFiles = [
         { filename: '1.jpg', path: '/tmp/1.jpg' },
         { filename: '2.jpg', path: '/tmp/2.jpg' },
@@ -73,7 +75,10 @@ describe('DamagesController', () => {
 
       mockDamagesService.create.mockResolvedValue(expectedSaved);
 
-      const result = await controller.create({ descricao: 'Dano na carcaça' }, fakeFiles);
+      const result = await controller.create(
+        { descricao: 'Dano na carcaça' },
+        fakeFiles,
+      );
 
       expect(result).toEqual(expectedSaved);
       expect(mockDamagesService.create).toHaveBeenCalledWith(
@@ -83,12 +88,16 @@ describe('DamagesController', () => {
     });
 
     it('deve acionar rollback físico (unlink) se a persistência falhar', async () => {
-      const unlinkSpy = jest.spyOn(fs.promises, 'unlink').mockResolvedValue(undefined);
+      const unlinkSpy = jest
+        .spyOn(fs.promises, 'unlink')
+        .mockResolvedValue(undefined);
       const fakeFiles = [
         { filename: 'foto_fail.jpg', path: '/tmp/foto_fail.jpg' },
       ] as Express.Multer.File[];
 
-      mockDamagesService.create.mockRejectedValue(new Error('Falha no banco MySQL'));
+      mockDamagesService.create.mockRejectedValue(
+        new Error('Falha no banco MySQL'),
+      );
 
       await expect(
         controller.create({ descricao: 'Falha simulada' }, fakeFiles),

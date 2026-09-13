@@ -51,7 +51,12 @@ export class DamagesController {
       fileFilter: (req, file, cb) => {
         // Validação estrita de extensão/tipo MIME seguro (JPG, PNG, WEBP)
         if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/i)) {
-          return cb(new BadRequestException('Apenas imagens (JPG, PNG ou WEBP) são permitidas!'), false);
+          return cb(
+            new BadRequestException(
+              'Apenas imagens (JPG, PNG ou WEBP) são permitidas!',
+            ),
+            false,
+          );
         }
         cb(null, true);
       },
@@ -62,17 +67,19 @@ export class DamagesController {
     @UploadedFiles() files: Express.Multer.File[],
   ) {
     if (!files || files.length === 0) {
-      throw new BadRequestException('Pelo menos uma imagem da avaria é obrigatória!');
+      throw new BadRequestException(
+        'Pelo menos uma imagem da avaria é obrigatória!',
+      );
     }
 
     if (files.length > 4) {
       // Limpeza imediata se o Multer tiver recebido mais de 4
       await Promise.all(
-        files.map((file) =>
-          fs.promises.unlink(file.path).catch(() => {}),
-        ),
+        files.map((file) => fs.promises.unlink(file.path).catch(() => {})),
       );
-      throw new BadRequestException('É permitido anexar no máximo 4 imagens por avaria!');
+      throw new BadRequestException(
+        'É permitido anexar no máximo 4 imagens por avaria!',
+      );
     }
 
     const imageUrls = files.map((file) => `/uploads/damages/${file.filename}`);
@@ -83,9 +90,14 @@ export class DamagesController {
       // Rollback físico: remove arquivos órfãos do disco caso a persistência falhe
       await Promise.all(
         files.map((file) =>
-          fs.promises.unlink(file.path).catch((unlinkErr) =>
-            console.warn(`[DamagesController] Falha no rollback do arquivo órfão ${file.path}:`, unlinkErr),
-          ),
+          fs.promises
+            .unlink(file.path)
+            .catch((unlinkErr) =>
+              console.warn(
+                `[DamagesController] Falha no rollback do arquivo órfão ${file.path}:`,
+                unlinkErr,
+              ),
+            ),
         ),
       );
       throw error;

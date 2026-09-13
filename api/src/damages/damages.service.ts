@@ -10,7 +10,10 @@ export class DamagesService {
     private readonly damageRepository: Repository<Damage>,
   ) {}
 
-  async create(data: Partial<Damage>, imageUrl?: string | string[]): Promise<Damage> {
+  async create(
+    data: Partial<Damage>,
+    imageUrl?: string | string[],
+  ): Promise<Damage> {
     const formattedImageUrl = Array.isArray(imageUrl)
       ? imageUrl.filter(Boolean).join(',')
       : imageUrl;
@@ -23,7 +26,9 @@ export class DamagesService {
   }
 
   async findAll(): Promise<Damage[]> {
-    return this.damageRepository.find({ relations: ['equipment', 'reportadoPor'] });
+    return this.damageRepository.find({
+      relations: ['equipment', 'reportadoPor'],
+    });
   }
 
   async findOne(id: number): Promise<Damage> {
