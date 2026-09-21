@@ -146,18 +146,6 @@ env/
 # NestJS specific
 dist/
 
-# Projeto - Arquivos e Referências de Contexto
+# Projeto
 doc/
-.agents/
-AGENTS.md
-GEMINI.md
-checklist-criacao-skill-casetrack.md
-SKILL.md
-diretrizes-refatoracao-skill-antigravity.md
 uploads/
-ROTEIRO_TESTES_MANUAIS.md
-.claude/
-CLAUDE.md
-**/AGENTS.md
-**/CLAUDE.md
-**/.claude/
