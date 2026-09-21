@@ -203,5 +203,5 @@ Time:        3.4 s
 
 ## 📄 Licença e Avaliação
 
-Projeto acadêmico desenvolvido para a avaliação do **7º Bimestre da Tech Academy**.
-Desenvolvido por **marchesido**. Todos os direitos reservados.
+Projeto acadêmico desenvolvido para a avaliação do 7º Bimestre da Tech Academy.
+Desenvolvido por Douglas Alexandre Marchesi. Todos os direitos reservados.
