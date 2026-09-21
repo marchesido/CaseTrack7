@@ -142,26 +142,31 @@ activityDiagram
 
 ## 3. Diagramas de Sequência
 
-### 3.1 Fluxo de Upload de Imagem (Avaria)
+### 3.1 Fluxo de Upload de Imagem (Avaria e Acervo)
 ```mermaid
 sequenceDiagram
     participant App as Aplicativo Mobile
-    participant API as Backend (API)
+    participant API as Backend (NestJS)
+    participant Auth as JwtAuthGuard & RolesGuard
     participant FS as File System (Multer)
     participant DB as Banco de Dados
     
-    App->>API: POST /avarias (FormData com Imagem)
-    API->>API: Valida Token de Acesso
-    API->>FS: Intercepta Arquivo (Multer)
-    FS-->>API: Retorna Metadados (Tamanho, Extensão)
-    API->>API: Valida Regras de Arquivo
-    alt Arquivo Inválido
-        API-->>App: 400 Bad Request (Erro de Validação)
-    else Arquivo Válido
-        FS->>FS: Salva Arquivo no Disco
-        API->>DB: INSERT Avaria (Caminho da Imagem, Descrição)
-        DB-->>API: Retorna ID da Avaria
-        API-->>App: 201 Created (Upload com Sucesso)
+    App->>API: POST /upload ou /damages (Multipart/FormData)
+    API->>Auth: Valida Token JWT e Perfil (Admin / Freelancer)
+    alt Não Autenticado ou Perfil Inválido
+        Auth-->>App: 401 Unauthorized / 403 Forbidden
+    else Autorizado
+        API->>FS: Intercepta Arquivo via Multer
+        FS-->>API: Metadados (extname(file.originalname), mimetype, size)
+        API->>API: Valida Extensão (.jpg, .jpeg, .png, .webp) e Tamanho (<= 5MB)
+        alt Arquivo Inválido
+            API-->>App: 400 Bad Request (Extensão ou tamanho inválido)
+        else Arquivo Válido
+            FS->>FS: Salva com Hash UUID v4 anti-colisão
+            API->>DB: INSERT Avaria ou Atualiza Equipamento
+            DB-->>API: Confirmação de Persistência
+            API-->>App: 201 Created (Upload realizado com sucesso)
+        end
     end
 ```
 
@@ -280,7 +285,7 @@ sequenceDiagram
 ```mermaid
 erDiagram
     USUARIO {
-        int id PK
+        uuid id PK
         string nome
         string email
         string senha_hash
@@ -289,17 +294,19 @@ erDiagram
     }
     
     EQUIPAMENTO {
-        int id PK
+        uuid id PK
         string nome
         string descricao
-        string numero_serie
+        string serialNumber
         string status "DISPONIVEL, EM_USO, MANUTENCAO"
+        string imageUrl
+        datetime createdAt
     }
     
     RESERVA {
         int id PK
-        int usuario_id FK
-        int equipamento_id FK
+        uuid usuario_id FK
+        uuid equipamento_id FK
         date data_inicio
         date data_fim
         string status "PENDENTE, APROVADA, REJEITADA"
@@ -310,13 +317,13 @@ erDiagram
         int reserva_id FK
         datetime data_hora
         string tipo "CHECKIN ou CHECKOUT"
-        int registrado_por_id FK
+        uuid registrado_por_id FK
     }
     
     AVARIA {
         int id PK
-        int equipamento_id FK
-        int reportado_por_id FK
+        uuid equipamento_id FK
+        uuid reportado_por_id FK
         string descricao
         string imagem_url
         datetime data_registro
@@ -324,7 +331,7 @@ erDiagram
 
     CONTRATO {
         int id PK
-        int producao_id FK
+        uuid producao_id FK
         int reserva_id FK
         string documento_url
         string status "DRAFT, ISSUED, SIGNED, CANCELLED"
@@ -336,33 +343,35 @@ erDiagram
     }
 
     PRODUCAO {
-        int id PK
+        uuid id PK
         string titulo
         string descricao
-        string status "PLANNING, IN_PROGRESS, COMPLETED, CANCELLED"
-        date data_inicio
-        date data_fim
-        decimal orcamento
-        string cliente_nome
-        int criado_por_id FK
-        datetime criado_em
+        string status "SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED"
+        datetime scheduledAt
+        datetime scheduledEndAt
+        boolean isAllDay
+        string timezone
+        string googleCalendarId
+        string googleEventId
+        string googleSourceStatus "ACTIVE, CANCELLED, DELETED"
+        datetime createdAt
     }
 
     ETAPA_PRODUCAO {
-        int id PK
-        int producao_id FK
-        string tipo "PRE_PRODUCTION, SHOOTING, POST_PRODUCTION, DELIVERY"
+        uuid id PK
+        uuid producao_id FK
+        string tipo "CAPTACAO, EDICAO, BACKUP, UPLOAD"
         string status "PENDING, IN_PROGRESS, COMPLETED"
         int ordem
-        date data_inicio
-        date data_fim
-        string notas
+        datetime completedAt
+        uuid responsible_user_id FK
+        datetime createdAt
     }
 
     EQUIPAMENTO_PRODUCAO {
-        int id PK
-        int producao_id FK
-        int equipamento_id FK
+        uuid id PK
+        uuid producao_id FK
+        uuid equipamento_id FK
         string status "ALLOCATED, CHECKED_OUT, CHECKED_IN, REPLACED, DAMAGED"
         datetime alocado_em
         datetime devolvido_em
@@ -370,19 +379,19 @@ erDiagram
     }
 
     MOVIMENTACAO_EQUIPAMENTO {
-        int id PK
-        int producao_id FK
-        int producao_equipamento_id FK
+        uuid id PK
+        uuid producao_id FK
+        uuid producao_equipamento_id FK
         string tipo "CHECK_OUT ou CHECK_IN"
         string status "SUCCESS ou INSPECTION_FAILED"
-        int executado_por_id FK
+        uuid executado_por_id FK
         datetime timestamp
         string notas
     }
 
     GOOGLE_TOKEN {
         int id PK
-        int usuario_id FK
+        uuid usuario_id FK
         string access_token_enc
         string refresh_token_enc
         string iv
